@@ -1,139 +1,217 @@
 "use strict";
 
+
 /* =========================================================
-   DADOS
+   DADOS INICIAIS
+
+   Estes dados servem apenas como fallback.
+
+   Quando estiver no GitHub Pages, o dashboard tentará
+   abrir automaticamente:
+
+   ./Estudos.xlsx
+
+   Se a planilha existir na mesma pasta, ela passa a ser
+   a fonte dos dados.
 ========================================================= */
 
 const DEFAULT_SUBJECTS = [
+
   {
-    id: "arte-cinematografica",
-    name: "Arte Cinematográfica",
-    theme: "Cinema",
-    total: 33
+    name:
+      "Arte Cinematográfica",
+
+    theme:
+      "Cinema",
+
+    total:
+      33,
+
+    days:
+      []
   },
+
   {
-    id: "aspectos-cinematograficos",
-    name: "Aspectos Cinematográficos",
-    theme: "Cinema",
-    total: 17
+    name:
+      "Aspectos Cinematográficos",
+
+    theme:
+      "Cinema",
+
+    total:
+      17,
+
+    days:
+      []
   },
+
   {
-    id: "historia-do-cinema",
-    name: "História do Cinema",
-    theme: "Cinema",
-    total: 27
+    name:
+      "História do Cinema",
+
+    theme:
+      "Cinema",
+
+    total:
+      27,
+
+    days:
+      []
   },
+
   {
-    id: "critica-cinematografica",
-    name: "Crítica Cinematográfica",
-    theme: "Cinema",
-    total: 18
+    name:
+      "Crítica Cinematográfica",
+
+    theme:
+      "Cinema",
+
+    total:
+      18,
+
+    days:
+      []
   },
+
   {
-    id: "teoria-historiografica",
-    name: "Teoria Historiográfica",
-    theme: "História",
-    total: 33
+    name:
+      "Teoria Historiográfica",
+
+    theme:
+      "História",
+
+    total:
+      33,
+
+    days:
+      []
   },
+
   {
-    id: "teoria-historiografica-brasileira",
-    name: "Teoria Historiográfica Brasileira",
-    theme: "História",
-    total: 29
+    name:
+      "Teoria Historiográfica Brasileira",
+
+    theme:
+      "História",
+
+    total:
+      29,
+
+    days:
+      []
   },
+
   {
-    id: "pre-historia",
-    name: "Pré-História",
-    theme: "História",
-    total: 17
+    name:
+      "Pré-História",
+
+    theme:
+      "História",
+
+    total:
+      17,
+
+    days:
+      []
   },
+
   {
-    id: "filosofia-antiguidade-europeia",
-    name: "Filosofia na Antiguidade Europeia",
-    theme: "Filosofia",
-    total: 35
+    name:
+      "Filosofia na Antiguidade Europeia",
+
+    theme:
+      "Filosofia",
+
+    total:
+      35,
+
+    days:
+      []
   },
+
   {
-    id: "filosofia-antiguidade-asiatica",
-    name: "Filosofia na Antiguidade Asiática",
-    theme: "Filosofia",
-    total: 15
+    name:
+      "Filosofia na Antiguidade Asiática",
+
+    theme:
+      "Filosofia",
+
+    total:
+      15,
+
+    days:
+      []
   },
+
   {
-    id: "filosofia-africana",
-    name: "Filosofia Africana",
-    theme: "Filosofia",
-    total: 48
+    name:
+      "Filosofia Africana",
+
+    theme:
+      "Filosofia",
+
+    total:
+      48,
+
+    days:
+      []
   }
-];
+
+].map(
+  subject => ({
+    ...subject,
+
+    id:
+      slugify(
+        subject.name
+      )
+  })
+);
 
 
 /* =========================================================
-   DIAS
+   PLANO SEMANAL PADRÃO
+
+   Usado apenas quando a planilha NÃO possui
+   uma coluna Dia ou Dias.
+
+   SÁBADO:
+   Teoria Historiográfica Brasileira
 ========================================================= */
 
-const DAY_KEYS = [
-  "segunda",
-  "terca",
-  "quarta",
-  "quinta",
-  "sexta",
-  "sabado",
-  "domingo"
-];
+const FALLBACK_WEEK_PLAN = {
 
-const DAY_LABELS = {
-  segunda: "Segunda",
-  terca: "Terça",
-  quarta: "Quarta",
-  quinta: "Quinta",
-  sexta: "Sexta",
-  sabado: "Sábado",
-  domingo: "Domingo"
-};
-
-
-/* =========================================================
-   ROTINA
-========================================================= */
-
-const DEFAULT_SCHEDULE = {
   segunda: [
-    "arte-cinematografica",
-    "teoria-historiografica"
+    "Arte Cinematográfica",
+    "Teoria Historiográfica"
   ],
 
   terca: [
-    "filosofia-africana",
-    "aspectos-cinematograficos"
+    "Filosofia Africana",
+    "Aspectos Cinematográficos"
   ],
 
   quarta: [
-    "historia-do-cinema",
-    "filosofia-antiguidade-europeia"
+    "História do Cinema",
+    "Filosofia na Antiguidade Europeia"
   ],
 
   quinta: [
-    "teoria-historiografica-brasileira",
-    "critica-cinematografica"
+    "Crítica Cinematográfica"
   ],
 
   sexta: [
-    "pre-historia",
-    "filosofia-antiguidade-asiatica"
-  ]
+    "Pré-História",
+    "Filosofia na Antiguidade Asiática"
+  ],
+
+  sabado: [
+    "Teoria Historiográfica Brasileira"
+  ],
+
+  domingo: []
+
 };
-
-
-/*
- * SÁBADO FIXO
- *
- * Isso é propositalmente independente do localStorage.
- * Portanto mesmo quem já tinha a rotina antiga salva
- * verá Teoria Historiográfica Brasileira no sábado.
- */
-const FIXED_SATURDAY_SUBJECT =
-  "teoria-historiografica-brasileira";
 
 
 /* =========================================================
@@ -141,17 +219,13 @@ const FIXED_SATURDAY_SUBJECT =
 ========================================================= */
 
 const STORAGE = {
-  subjects:
-    "studyDashboard.subjects.v2",
+
+  dataset:
+    "studyDashboard.dataset.v3",
 
   progress:
-    "studyDashboard.progress.v2",
+    "studyDashboard.progress.v3"
 
-  events:
-    "studyDashboard.events.v2",
-
-  schedule:
-    "studyDashboard.schedule.v2"
 };
 
 
@@ -160,710 +234,384 @@ const STORAGE = {
 ========================================================= */
 
 const state = {
+
   subjects:
-    loadJson(
-      STORAGE.subjects,
+    loadJSON(
+      STORAGE.dataset,
       DEFAULT_SUBJECTS
     ),
 
   progress:
-    loadJson(
+    loadJSON(
       STORAGE.progress,
       {}
     ),
 
-  events:
-    loadJson(
-      STORAGE.events,
-      []
-    ),
-
-  schedule:
-    loadJson(
-      STORAGE.schedule,
-      DEFAULT_SCHEDULE
-    ),
-
-  filters: {
-    themes: new Set(),
-    days: new Set(),
-    query: ""
-  },
-
-  charts: {},
-
-  openLessons:
+  openSubjects:
     new Set(),
+
+  themeColors:
+    new Map(),
+
+  themeCharts:
+    [],
+
+  remainingChart:
+    null,
 
   lastAction:
     null,
 
   toastTimer:
     null
+
 };
 
 
-const el = id =>
-  document.getElementById(id);
-
-
-/* =========================================================
-   STORAGE
-========================================================= */
-
-function clone(value) {
-  return JSON.parse(
-    JSON.stringify(value)
+const $ = id =>
+  document.getElementById(
+    id
   );
-}
-
-
-function loadJson(
-  key,
-  fallback
-) {
-  try {
-    const raw =
-      localStorage.getItem(key);
-
-    return raw
-      ? JSON.parse(raw)
-      : clone(fallback);
-
-  } catch (error) {
-    console.warn(
-      `Não foi possível carregar ${key}.`,
-      error
-    );
-
-    return clone(fallback);
-  }
-}
-
-
-function saveJson(
-  key,
-  value
-) {
-  try {
-    localStorage.setItem(
-      key,
-      JSON.stringify(value)
-    );
-
-  } catch (error) {
-    console.error(
-      `Não foi possível salvar ${key}.`,
-      error
-    );
-  }
-}
 
 
 /* =========================================================
    UTILITÁRIOS
 ========================================================= */
 
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+function clone(
+  value
+) {
+
+  return JSON.parse(
+    JSON.stringify(
+      value
+    )
+  );
+
 }
 
 
-function normalizeText(value) {
-  return String(value)
-    .normalize("NFD")
+function loadJSON(
+  key,
+  fallback
+) {
+
+  try {
+
+    const raw =
+      localStorage.getItem(
+        key
+      );
+
+
+    return raw
+
+      ? JSON.parse(
+          raw
+        )
+
+      : clone(
+          fallback
+        );
+
+  }
+
+  catch (error) {
+
+    console.warn(
+      `Falha ao carregar ${key}.`,
+      error
+    );
+
+
+    return clone(
+      fallback
+    );
+
+  }
+
+}
+
+
+function saveJSON(
+  key,
+  value
+) {
+
+  try {
+
+    localStorage.setItem(
+
+      key,
+
+      JSON.stringify(
+        value
+      )
+
+    );
+
+  }
+
+  catch (error) {
+
+    console.warn(
+      `Falha ao salvar ${key}.`,
+      error
+    );
+
+  }
+
+}
+
+
+function normalizeText(
+  value
+) {
+
+  return String(
+    value ?? ""
+  )
+
+    .normalize(
+      "NFD"
+    )
+
     .replace(
       /[\u0300-\u036f]/g,
       ""
     )
+
     .toLocaleLowerCase(
       "pt-BR"
     )
+
     .trim();
+
 }
 
 
-function slugify(text) {
-  return normalizeText(text)
+function slugify(
+  value
+) {
+
+  return normalizeText(
+    value
+  )
+
     .replace(
       /[^a-z0-9]+/g,
       "-"
     )
+
     .replace(
       /^-|-$/g,
       ""
     );
+
 }
 
+
+function escapeHTML(
+  value
+) {
+
+  return String(
+    value
+  )
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
+}
+
+
+/* =========================================================
+   PROGRESSO
+========================================================= */
 
 function getCompletedSet(
   subjectId
 ) {
+
   return new Set(
-    state.progress[subjectId] ||
+
+    state.progress[
+      subjectId
+    ]
+
+    ||
+
     []
+
   );
+
 }
 
 
 function completedCount(
   subject
 ) {
+
   return Math.min(
+
     getCompletedSet(
       subject.id
     ).size,
+
     subject.total
+
   );
+
 }
 
 
-function percent(subject) {
-  if (!subject.total) {
+function percentage(
+  subject
+) {
+
+  if (
+    !subject.total
+  ) {
+
     return 0;
+
   }
 
+
   return Math.round(
+
     (
-      completedCount(subject) /
+      completedCount(
+        subject
+      )
+      /
       subject.total
-    ) * 100
+    )
+
+    *
+
+    100
+
   );
+
+}
+
+
+function remainingCount(
+  subject
+) {
+
+  return Math.max(
+
+    0,
+
+    subject.total
+    -
+    completedCount(
+      subject
+    )
+
+  );
+
 }
 
 
 function totals(
-  subjects = state.subjects
+  subjects =
+    state.subjects
 ) {
+
   const total =
     subjects.reduce(
-      (sum, subject) =>
-        sum + subject.total,
+
+      (
+        sum,
+        subject
+      ) =>
+
+        sum
+        +
+        subject.total,
+
       0
+
     );
 
-  const done =
+
+  const completed =
     subjects.reduce(
-      (sum, subject) =>
-        sum +
-        completedCount(subject),
+
+      (
+        sum,
+        subject
+      ) =>
+
+        sum
+        +
+        completedCount(
+          subject
+        ),
+
       0
+
     );
+
 
   return {
+
     total,
-    done,
+
+    completed,
 
     remaining:
       Math.max(
         0,
-        total - done
+        total - completed
       ),
 
-    percent:
+    percentage:
       total
+
         ? Math.round(
-            (done / total) *
-            100
-          )
-        : 0
-  };
-}
 
-
-function getDayKey(
-  date = new Date()
-) {
-  const keys = [
-    "domingo",
-    "segunda",
-    "terca",
-    "quarta",
-    "quinta",
-    "sexta",
-    "sabado"
-  ];
-
-  return keys[
-    date.getDay()
-  ];
-}
-
-
-function progressMessage(pct) {
-  if (pct === 100) {
-    return "Tudo concluído";
-  }
-
-  if (pct >= 75) {
-    return "Reta final";
-  }
-
-  if (pct >= 50) {
-    return "Mais da metade";
-  }
-
-  if (pct >= 25) {
-    return "Ritmo consistente";
-  }
-
-  if (pct > 0) {
-    return "Progresso iniciado";
-  }
-
-  return "Pronto para começar";
-}
-
-
-function compactName(name) {
-  return name
-    .replace(
-      "Filosofia na Antiguidade ",
-      "Fil. Antig. "
-    )
-    .replace(
-      "Teoria Historiográfica Brasileira",
-      "Teoria Hist. Brasileira"
-    )
-    .replace(
-      "Aspectos Cinematográficos",
-      "Aspectos Cinemat."
-    )
-    .replace(
-      "Crítica Cinematográfica",
-      "Crítica Cinemat."
-    );
-}
-
-
-/* =========================================================
-   NORMALIZAR PROGRESSO
-========================================================= */
-
-function normalizeProgress() {
-  const validIds =
-    new Set(
-      state.subjects.map(
-        subject =>
-          subject.id
-      )
-    );
-
-  Object.keys(
-    state.progress
-  ).forEach(id => {
-    if (
-      !validIds.has(id)
-    ) {
-      delete state.progress[id];
-    }
-  });
-
-
-  state.subjects.forEach(
-    subject => {
-      const lessons =
-        [
-          ...getCompletedSet(
-            subject.id
-          )
-        ]
-          .map(Number)
-
-          .filter(
-            number =>
-              Number.isInteger(
-                number
-              ) &&
-              number >= 1 &&
-              number <=
-                subject.total
-          )
-
-          .sort(
-            (a, b) =>
-              a - b
-          );
-
-      state.progress[
-        subject.id
-      ] = lessons;
-    }
-  );
-
-
-  saveJson(
-    STORAGE.progress,
-    state.progress
-  );
-}
-
-
-/* =========================================================
-   ROTINA / DIAS
-========================================================= */
-
-function getCatchUpSubjects(
-  limit = 1
-) {
-  return [
-    ...state.subjects
-  ]
-    .filter(
-      subject =>
-        completedCount(subject) <
-        subject.total
-    )
-
-    .sort(
-      (a, b) =>
-        percent(a) -
-          percent(b) ||
-        b.total -
-          a.total
-    )
-
-    .slice(
-      0,
-      limit
-    )
-
-    .map(
-      subject =>
-        subject.id
-    );
-}
-
-
-function daySubjectIds(day) {
-
-  /*
-   * SÁBADO:
-   * sempre Teoria Historiográfica Brasileira.
-   */
-  if (
-    day === "sabado"
-  ) {
-    const exists =
-      state.subjects.some(
-        subject =>
-          subject.id ===
-          FIXED_SATURDAY_SUBJECT
-      );
-
-    return exists
-      ? [
-          FIXED_SATURDAY_SUBJECT
-        ]
-      : [];
-  }
-
-
-  /*
-   * Domingo:
-   * revisão automática.
-   */
-  if (
-    day === "domingo"
-  ) {
-    return getCatchUpSubjects(
-      1
-    );
-  }
-
-
-  /*
-   * Segunda a sexta:
-   * rotina configurável.
-   */
-  return (
-    state.schedule[day] ||
-    []
-  );
-}
-
-
-function subjectsForDay(day) {
-  const ids =
-    new Set(
-      daySubjectIds(day)
-    );
-
-  return state.subjects.filter(
-    subject =>
-      ids.has(
-        subject.id
-      )
-  );
-}
-
-
-function daysForSubject(
-  subjectId
-) {
-  return DAY_KEYS.filter(
-    day =>
-      daySubjectIds(day)
-        .includes(subjectId)
-  );
-}
-
-
-/* =========================================================
-   FILTROS
-========================================================= */
-
-function filteredSubjects() {
-  return state.subjects.filter(
-    subject => {
-
-      const themeOk =
-        state.filters
-          .themes
-          .size === 0 ||
-
-        state.filters
-          .themes
-          .has(
-            subject.theme
-          );
-
-
-      const subjectDays =
-        daysForSubject(
-          subject.id
-        );
-
-
-      const dayOk =
-        state.filters
-          .days
-          .size === 0 ||
-
-        [
-          ...state.filters.days
-        ].some(
-          day =>
-            subjectDays.includes(
-              day
+            (
+              completed
+              /
+              total
             )
-        );
 
+            *
 
-      const searchable =
-        normalizeText(
-          `${subject.name} ${subject.theme}`
-        );
+            100
 
-
-      const queryOk =
-        !state.filters.query ||
-
-        searchable.includes(
-          state.filters.query
-        );
-
-
-      return (
-        themeOk &&
-        dayOk &&
-        queryOk
-      );
-    }
-  );
-}
-
-
-/* =========================================================
-   CHIPS DE FILTRO
-========================================================= */
-
-function chipTemplate(
-  value,
-  label,
-  active,
-  type
-) {
-  return `
-    <button
-      type="button"
-      class="chip ${
-        active
-          ? "is-active"
-          : ""
-      }"
-      data-filter-type="${type}"
-      data-value="${escapeHtml(
-        value
-      )}"
-      aria-pressed="${active}"
-    >
-      ${escapeHtml(label)}
-    </button>
-  `;
-}
-
-
-function renderFilters() {
-  const themes =
-    [
-      ...new Set(
-        state.subjects.map(
-          subject =>
-            subject.theme
-        )
-      )
-    ].sort(
-      (a, b) =>
-        a.localeCompare(
-          b,
-          "pt-BR"
-        )
-    );
-
-
-  el(
-    "themeFilters"
-  ).innerHTML =
-    themes
-      .map(
-        theme =>
-          chipTemplate(
-            theme,
-            theme,
-            state.filters
-              .themes
-              .has(theme),
-            "theme"
           )
-      )
-      .join("");
 
+        : 0
 
-  el(
-    "dayFilters"
-  ).innerHTML =
-    DAY_KEYS
-      .map(
-        day =>
-          chipTemplate(
-            day,
-            DAY_LABELS[day],
-            state.filters
-              .days
-              .has(day),
-            "day"
-          )
-      )
-      .join("");
-}
+  };
 
-
-function toggleFilter(
-  type,
-  value
-) {
-  const set =
-    type === "theme"
-      ? state.filters.themes
-      : state.filters.days;
-
-
-  if (
-    set.has(value)
-  ) {
-    set.delete(value);
-  } else {
-    set.add(value);
-  }
-
-
-  renderFilters();
-
-  renderFilteredDashboard();
-}
-
-
-/* =========================================================
-   INICIALIZAÇÃO
-========================================================= */
-
-function init() {
-  normalizeProgress();
-
-  syncScheduleCopy();
-
-  renderCurrentDate();
-
-  renderFilters();
-
-  renderAll();
-
-  bindStaticEvents();
-}
-
-
-function renderAll() {
-  renderToday();
-
-  renderWeek();
-
-  renderFilteredDashboard();
-}
-
-
-function renderFilteredDashboard() {
-  const subjects =
-    filteredSubjects();
-
-  renderMetrics(
-    subjects
-  );
-
-  renderDisciplines(
-    subjects
-  );
-
-  renderCharts(
-    subjects
-  );
-}
-
-
-/* =========================================================
-   CORRIGIR TEXTOS DO HTML
-========================================================= */
-
-function syncScheduleCopy() {
-  const scheduleDescription =
-    document.querySelector(
-      "#scheduleTitle + .section-description"
-    );
-
-  if (
-    scheduleDescription
-  ) {
-    scheduleDescription.textContent =
-      "Segunda a sexta usam sua rotina definida. Sábado é fixo para Teoria Historiográfica Brasileira; domingo fica como revisão automática.";
-  }
-
-
-  const dialogDescription =
-    document.querySelector(
-      "#scheduleDialogTitle + p"
-    );
-
-  if (
-    dialogDescription
-  ) {
-    dialogDescription.textContent =
-      "Selecione as disciplinas de segunda a sexta. Sábado permanece fixo em Teoria Historiográfica Brasileira e domingo é sugerido automaticamente.";
-  }
 }
 
 
@@ -871,314 +619,117 @@ function syncScheduleCopy() {
    DATA
 ========================================================= */
 
-function renderCurrentDate() {
-  const now =
-    new Date();
+function getDayKey(
+  date =
+    new Date()
+) {
+
+  return [
+
+    "domingo",
+    "segunda",
+    "terca",
+    "quarta",
+    "quinta",
+    "sexta",
+    "sabado"
+
+  ][
+    date.getDay()
+  ];
+
+}
 
 
-  const formatted =
+function getDayLabel(
+  day
+) {
+
+  return {
+
+    domingo:
+      "Domingo",
+
+    segunda:
+      "Segunda-feira",
+
+    terca:
+      "Terça-feira",
+
+    quarta:
+      "Quarta-feira",
+
+    quinta:
+      "Quinta-feira",
+
+    sexta:
+      "Sexta-feira",
+
+    sabado:
+      "Sábado"
+
+  }[
+    day
+  ] || day;
+
+}
+
+
+function formatDate(
+  date =
+    new Date()
+) {
+
+  const text =
     new Intl.DateTimeFormat(
+
       "pt-BR",
+
       {
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric"
+
+        weekday:
+          "long",
+
+        day:
+          "2-digit",
+
+        month:
+          "long",
+
+        year:
+          "numeric"
+
       }
-    ).format(now);
+
+    ).format(
+      date
+    );
 
 
-  el(
-    "currentDate"
-  ).textContent =
-    formatted
+  return (
+
+    text
       .charAt(0)
-      .toUpperCase() +
-    formatted.slice(1);
-}
+      .toUpperCase()
 
+    +
 
-/* =========================================================
-   O QUE ESTUDAR HOJE
-========================================================= */
-
-function renderToday() {
-  const day =
-    getDayKey();
-
-
-  const subjects =
-    subjectsForDay(day);
-
-
-  el(
-    "todayBadge"
-  ).textContent =
-    `${DAY_LABELS[
-      day
-    ].toUpperCase()} · HOJE`;
-
-
-  if (
-    day === "sabado"
-  ) {
-    el(
-      "todaySubtitle"
-    ).textContent =
-      "Sábado reservado para Teoria Historiográfica Brasileira.";
-
-  } else if (
-    day === "domingo"
-  ) {
-    el(
-      "todaySubtitle"
-    ).textContent =
-      "Revisão leve: o painel sugere a disciplina com menor avanço.";
-
-  } else {
-    el(
-      "todaySubtitle"
-    ).textContent =
-      "Sua rotina definida para hoje.";
-  }
-
-
-  if (
-    !subjects.length
-  ) {
-    el(
-      "todaySubjects"
-    ).innerHTML = `
-      <div class="today-subject">
-        <strong>
-          Dia livre
-        </strong>
-
-        <small>
-          Use para revisão ou descanso.
-        </small>
-      </div>
-    `;
-
-    return;
-  }
-
-
-  el(
-    "todaySubjects"
-  ).innerHTML =
-    subjects
-      .map(
-        subject => `
-          <article class="today-subject">
-
-            <span
-              class="today-subject__theme"
-            >
-              ${escapeHtml(
-                subject.theme
-              )}
-            </span>
-
-            <strong>
-              ${escapeHtml(
-                subject.name
-              )}
-            </strong>
-
-            <small>
-              ${completedCount(
-                subject
-              )}
-              de
-              ${subject.total}
-              ·
-              ${percent(
-                subject
-              )}%
-            </small>
-
-          </article>
-        `
-      )
-      .join("");
-}
-
-
-/* =========================================================
-   MÉTRICAS
-========================================================= */
-
-function renderMetrics(
-  subjects =
-    filteredSubjects()
-) {
-  const summary =
-    totals(subjects);
-
-
-  const subjectIds =
-    new Set(
-      subjects.map(
-        subject =>
-          subject.id
-      )
-    );
-
-
-  const last7 =
-    countEventsSince(
-      7,
-      subjectIds
-    );
-
-
-  el(
-    "metricPercent"
-  ).textContent =
-    `${summary.percent}%`;
-
-
-  el(
-    "metricPercentBar"
-  ).style.width =
-    `${summary.percent}%`;
-
-
-  el(
-    "metricPercentMeta"
-  ).textContent =
-    `${summary.done} de ${summary.total} aulas`;
-
-
-  el(
-    "metricDone"
-  ).textContent =
-    summary.done
-      .toLocaleString(
-        "pt-BR"
-      );
-
-
-  el(
-    "metricRemaining"
-  ).textContent =
-    summary.remaining
-      .toLocaleString(
-        "pt-BR"
-      );
-
-
-  el(
-    "metricRemainingMeta"
-  ).textContent =
-    progressMessage(
-      summary.percent
-    );
-
-
-  el(
-    "metricWeek"
-  ).textContent =
-    last7
-      .toLocaleString(
-        "pt-BR"
-      );
-
-
-  el(
-    "donutPercent"
-  ).textContent =
-    `${summary.percent}%`;
-}
-
-
-/* =========================================================
-   DISCIPLINAS
-========================================================= */
-
-function renderDisciplines(
-  subjects =
-    filteredSubjects()
-) {
-  el(
-    "resultCount"
-  ).textContent =
-    `${subjects.length} ${
-      subjects.length === 1
-        ? "disciplina"
-        : "disciplinas"
-    }`;
-
-
-  el(
-    "emptyState"
-  ).hidden =
-    subjects.length >
-    0;
-
-
-  el(
-    "disciplineGrid"
-  ).innerHTML =
-    subjects
-      .map(
-        subjectCardTemplate
-      )
-      .join("");
-
-
-  /*
-   * IMPORTANTE:
-   *
-   * Os botões recebem seus eventos
-   * diretamente DEPOIS que os cards
-   * foram renderizados.
-   *
-   * Isso é diferente dos filtros.
-   */
-  el(
-    "disciplineGrid"
-  )
-    .querySelectorAll(
-      "[data-action]"
+    text.slice(
+      1
     )
-    .forEach(
-      button => {
-        button.addEventListener(
-          "click",
-          handleDisciplineAction
-        );
-      }
-    );
+
+  );
+
 }
 
 
 /* =========================================================
-   TEMPLATE DO CARD
+   PRÓXIMA AULA
 ========================================================= */
 
-function subjectCardTemplate(
+function nextLesson(
   subject
 ) {
-  const done =
-    completedCount(subject);
-
-
-  const pct =
-    percent(subject);
-
-
-  const complete =
-    done >=
-    subject.total;
-
-
-  const panelOpen =
-    state.openLessons.has(
-      subject.id
-    );
-
 
   const completed =
     getCompletedSet(
@@ -1186,463 +737,976 @@ function subjectCardTemplate(
     );
 
 
-  return `
-    <article
-      class="
-        discipline-card
-        ${
-          complete
-            ? "is-complete"
-            : ""
-        }
-      "
-      data-subject-id="${
-        subject.id
-      }"
-    >
+  for (
 
-      <div
-        class="discipline-card__top"
-      >
+    let lesson = 1;
 
-        <div
-          class="discipline-card__title-wrap"
-        >
+    lesson <=
+      subject.total;
 
-          <span
-            class="discipline-card__theme"
-          >
-            ${escapeHtml(
-              subject.theme
-            )}
-          </span>
+    lesson += 1
 
-          <h3
-            class="discipline-card__title"
-          >
-            ${escapeHtml(
-              subject.name
-            )}
-          </h3>
-
-        </div>
-
-
-        <div
-          class="discipline-card__percent"
-          aria-label="${pct}% concluído"
-        >
-          ${pct}%
-        </div>
-
-      </div>
-
-
-      <div
-        class="discipline-card__bar"
-        aria-hidden="true"
-      >
-        <span
-          style="width:${pct}%"
-        ></span>
-      </div>
-
-
-      <div
-        class="discipline-card__meta"
-      >
-
-        <span>
-          ${done}
-          assistidas
-        </span>
-
-        <span>
-          ${Math.max(
-            0,
-            subject.total -
-            done
-          )}
-          restantes
-        </span>
-
-      </div>
-
-
-      <div
-        class="discipline-card__actions"
-      >
-
-        <button
-          class="counter-button"
-          type="button"
-          data-action="decrement"
-          data-id="${subject.id}"
-          ${
-            done === 0
-              ? "disabled"
-              : ""
-          }
-          aria-label="Remover uma aula concluída de ${escapeHtml(
-            subject.name
-          )}"
-        >
-          −
-        </button>
-
-
-        <button
-          class="primary-action"
-          type="button"
-          data-action="increment"
-          data-id="${subject.id}"
-          ${
-            complete
-              ? "disabled"
-              : ""
-          }
-        >
-          ${
-            complete
-              ? "Concluída ✓"
-              : "+1 aula assistida"
-          }
-        </button>
-
-
-        <button
-          class="counter-button"
-          type="button"
-          data-action="increment"
-          data-id="${subject.id}"
-          ${
-            complete
-              ? "disabled"
-              : ""
-          }
-          aria-label="Adicionar uma aula concluída em ${escapeHtml(
-            subject.name
-          )}"
-        >
-          +
-        </button>
-
-      </div>
-
-
-      <button
-        class="details-button"
-        type="button"
-        data-action="toggle-lessons"
-        data-id="${subject.id}"
-        aria-expanded="${panelOpen}"
-      >
-        ${
-          panelOpen
-            ? "Ocultar aulas"
-            : "Ver aulas"
-        }
-      </button>
-
-
-      <div
-        class="lesson-panel"
-        data-lesson-panel="${subject.id}"
-        ${
-          panelOpen
-            ? ""
-            : "hidden"
-        }
-      >
-
-        ${
-          panelOpen
-            ? lessonPanelTemplate(
-                subject,
-                completed
-              )
-            : ""
-        }
-
-      </div>
-
-    </article>
-  `;
-}
-
-
-/* =========================================================
-   AULAS INDIVIDUAIS
-========================================================= */
-
-function lessonPanelTemplate(
-  subject,
-  completed =
-    getCompletedSet(
-      subject.id
-    )
-) {
-  return `
-    <p
-      class="lesson-panel__hint"
-    >
-      Toque em uma aula para marcar ou desmarcar.
-    </p>
-
-
-    <div class="lesson-grid">
-
-      ${
-        Array.from(
-          {
-            length:
-              subject.total
-          },
-          (_, index) =>
-            index + 1
-        )
-          .map(
-            number => `
-              <button
-                type="button"
-
-                class="
-                  lesson-pill
-                  ${
-                    completed.has(
-                      number
-                    )
-                      ? "is-done"
-                      : ""
-                  }
-                "
-
-                data-action="toggle-lesson"
-
-                data-id="${subject.id}"
-
-                data-lesson="${number}"
-
-                aria-pressed="${
-                  completed.has(
-                    number
-                  )
-                }"
-
-                aria-label="Aula ${number} de ${escapeHtml(
-                  subject.name
-                )}"
-              >
-                ${number}
-              </button>
-            `
-          )
-          .join("")
-      }
-
-    </div>
-  `;
-}
-
-
-/* =========================================================
-   CLIQUES NAS AULAS / CARDS
-========================================================= */
-
-function handleDisciplineAction(
-  event
-) {
-  /*
-   * Aqui usamos currentTarget,
-   * porque o listener foi colocado
-   * diretamente no botão.
-   */
-  const button =
-    event.currentTarget;
-
-
-  const action =
-    button.dataset.action;
-
-
-  const subjectId =
-    button.dataset.id;
-
-
-  if (
-    !subjectId
   ) {
-    return;
-  }
 
-
-  if (
-    action === "increment"
-  ) {
-    changeOneLesson(
-      subjectId,
-      1
-    );
-
-    return;
-  }
-
-
-  if (
-    action === "decrement"
-  ) {
-    changeOneLesson(
-      subjectId,
-      -1
-    );
-
-    return;
-  }
-
-
-  if (
-    action === "toggle-lessons"
-  ) {
-    toggleLessonPanel(
-      subjectId
-    );
-
-    return;
-  }
-
-
-  if (
-    action === "toggle-lesson"
-  ) {
-    const lesson =
-      Number(
-        button.dataset.lesson
-      );
-
-
-    const checked =
-      getCompletedSet(
-        subjectId
-      ).has(
+    if (
+      !completed.has(
         lesson
-      );
+      )
+    ) {
 
+      return lesson;
 
-    setLesson(
-      subjectId,
-      lesson,
-      !checked,
-      {
-        toast: true
-      }
-    );
-  }
-}
-
-
-/* =========================================================
-   +1 / -1
-========================================================= */
-
-function changeOneLesson(
-  subjectId,
-  direction
-) {
-  const subject =
-    state.subjects.find(
-      item =>
-        item.id ===
-        subjectId
-    );
-
-
-  if (!subject) {
-    return;
-  }
-
-
-  const done =
-    getCompletedSet(
-      subjectId
-    );
-
-
-  /*
-   * +1
-   */
-  if (
-    direction > 0
-  ) {
-    const lesson =
-      Array.from(
-        {
-          length:
-            subject.total
-        },
-        (_, index) =>
-          index + 1
-      ).find(
-        number =>
-          !done.has(number)
-      );
-
-
-    if (!lesson) {
-      return;
     }
 
+  }
 
-    setLesson(
-      subjectId,
-      lesson,
-      true,
-      {
-        toast: true
-      }
+
+  return null;
+
+}
+
+
+/* =========================================================
+   CORES DINÂMICAS DOS TEMAS
+========================================================= */
+
+function stringHash(
+  value
+) {
+
+  let hash =
+    0;
+
+
+  const text =
+    normalizeText(
+      value
     );
 
 
-    return;
+  for (
+
+    let i = 0;
+
+    i < text.length;
+
+    i += 1
+
+  ) {
+
+    hash =
+      (
+        (
+          hash << 5
+        )
+        -
+        hash
+      )
+
+      +
+
+      text.charCodeAt(
+        i
+      );
+
+
+    hash |=
+      0;
+
   }
 
 
-  /*
-   * -1
-   */
-  const lesson =
-    [...done]
-      .sort(
-        (a, b) =>
-          b - a
-      )[0];
+  return Math.abs(
+    hash
+  );
+
+}
 
 
-  if (!lesson) {
-    return;
-  }
+function hueDistance(
+  a,
+  b
+) {
+
+  const difference =
+    Math.abs(
+      a - b
+    )
+    %
+    360;
 
 
-  setLesson(
-    subjectId,
-    lesson,
-    false,
-    {
-      toast: true
+  return Math.min(
+
+    difference,
+
+    360 -
+    difference
+
+  );
+
+}
+
+
+/*
+ * Gera uma cor diferente para cada tema.
+ *
+ * Não existe uma lista fixa de temas.
+ *
+ * Portanto:
+ * Cinema
+ * História
+ * Filosofia
+ * Sociologia
+ * Geografia
+ * etc.
+ *
+ * funcionarão sem alterar o código.
+ */
+
+function buildThemeColors() {
+
+  const themes = [
+
+    ...new Set(
+
+      state.subjects.map(
+        subject =>
+          subject.theme
+      )
+
+    )
+
+  ]
+
+    .filter(
+      Boolean
+    )
+
+    .sort(
+      (
+        a,
+        b
+      ) =>
+
+        a.localeCompare(
+          b,
+          "pt-BR"
+        )
+    );
+
+
+  const usedHues =
+    [];
+
+
+  const colors =
+    new Map();
+
+
+  themes.forEach(
+    theme => {
+
+      let hue =
+        stringHash(
+          theme
+        )
+        %
+        360;
+
+
+      let attempts =
+        0;
+
+
+      while (
+
+        usedHues.some(
+          existingHue =>
+
+            hueDistance(
+              existingHue,
+              hue
+            )
+            <
+            34
+        )
+
+        &&
+
+        attempts <
+          12
+
+      ) {
+
+        hue =
+          (
+            hue + 47
+          )
+          %
+          360;
+
+
+        attempts +=
+          1;
+
+      }
+
+
+      usedHues.push(
+        hue
+      );
+
+
+      colors.set(
+
+        theme,
+
+        `hsl(${hue} 62% 54%)`
+
+      );
+
     }
   );
+
+
+  state.themeColors =
+    colors;
+
+}
+
+
+function themeColor(
+  theme
+) {
+
+  return (
+
+    state.themeColors.get(
+      theme
+    )
+
+    ||
+
+    "hsl(256 62% 54%)"
+
+  );
+
 }
 
 
 /* =========================================================
-   SALVAR AULA
+   PLANILHA
+========================================================= */
+
+function readCell(
+  row,
+  names
+) {
+
+  for (
+    const name
+    of names
+  ) {
+
+    if (
+
+      row[
+        name
+      ] !==
+        undefined
+
+      &&
+
+      row[
+        name
+      ] !==
+        null
+
+      &&
+
+      String(
+        row[name]
+      ).trim() !== ""
+
+    ) {
+
+      return row[
+        name
+      ];
+
+    }
+
+  }
+
+
+  return "";
+
+}
+
+
+/* =========================================================
+   DIAS OPCIONAIS NA PLANILHA
+========================================================= */
+
+function normalizeDay(
+  value
+) {
+
+  const text =
+    normalizeText(
+      value
+    );
+
+
+  if (
+    text.startsWith(
+      "seg"
+    )
+  ) {
+
+    return "segunda";
+
+  }
+
+
+  if (
+    text.startsWith(
+      "ter"
+    )
+  ) {
+
+    return "terca";
+
+  }
+
+
+  if (
+    text.startsWith(
+      "qua"
+    )
+  ) {
+
+    return "quarta";
+
+  }
+
+
+  if (
+    text.startsWith(
+      "qui"
+    )
+  ) {
+
+    return "quinta";
+
+  }
+
+
+  if (
+    text.startsWith(
+      "sex"
+    )
+  ) {
+
+    return "sexta";
+
+  }
+
+
+  if (
+    text.startsWith(
+      "sab"
+    )
+  ) {
+
+    return "sabado";
+
+  }
+
+
+  if (
+    text.startsWith(
+      "dom"
+    )
+  ) {
+
+    return "domingo";
+
+  }
+
+
+  return "";
+
+}
+
+
+function parseDays(
+  value
+) {
+
+  if (
+    !value
+  ) {
+
+    return [];
+
+  }
+
+
+  return String(
+    value
+  )
+
+    .split(
+      /[,;|/]+/
+    )
+
+    .map(
+      item =>
+        normalizeDay(
+          item
+        )
+    )
+
+    .filter(
+      Boolean
+    );
+
+}
+
+
+/* =========================================================
+   CONVERTER PLANILHA
+========================================================= */
+
+function rowsToSubjects(
+  rows
+) {
+
+  return rows
+
+    .map(
+      row => {
+
+        const name =
+          String(
+
+            readCell(
+
+              row,
+
+              [
+                "Disciplina",
+                "disciplina"
+              ]
+
+            )
+
+          ).trim();
+
+
+        const theme =
+          String(
+
+            readCell(
+
+              row,
+
+              [
+                "Tema",
+                "tema"
+              ]
+
+            )
+
+          ).trim();
+
+
+        const total =
+          Number(
+
+            readCell(
+
+              row,
+
+              [
+                "Aulas totais",
+                "Aulas Totais",
+                "aulas totais",
+                "Total"
+              ]
+
+            )
+
+          );
+
+
+        const rawDays =
+          readCell(
+
+            row,
+
+            [
+              "Dias",
+              "Dia",
+              "Dia da semana",
+              "dias",
+              "dia"
+            ]
+
+          );
+
+
+        const correctedName =
+
+          name ===
+          "Critícia Cinematográfica"
+
+            ? "Crítica Cinematográfica"
+
+            : name;
+
+
+        return {
+
+          id:
+            slugify(
+              correctedName
+            ),
+
+          name:
+            correctedName,
+
+          theme,
+
+          total:
+            Math.max(
+
+              0,
+
+              Math.floor(
+                total || 0
+              )
+
+            ),
+
+          days:
+            parseDays(
+              rawDays
+            )
+
+        };
+
+      }
+    )
+
+    .filter(
+      subject =>
+
+        subject.name
+
+        &&
+
+        subject.theme
+
+        &&
+
+        subject.total >
+          0
+    );
+
+}
+
+
+/* =========================================================
+   LER XLSX
+========================================================= */
+
+function parseWorkbook(
+  arrayBuffer
+) {
+
+  if (
+    typeof XLSX ===
+    "undefined"
+  ) {
+
+    throw new Error(
+      "Biblioteca XLSX não disponível."
+    );
+
+  }
+
+
+  const workbook =
+    XLSX.read(
+
+      arrayBuffer,
+
+      {
+        type:
+          "array"
+      }
+
+    );
+
+
+  const firstSheet =
+    workbook.Sheets[
+
+      workbook
+        .SheetNames[0]
+
+    ];
+
+
+  const rows =
+    XLSX.utils.sheet_to_json(
+
+      firstSheet,
+
+      {
+        defval:
+          ""
+      }
+
+    );
+
+
+  const subjects =
+    rowsToSubjects(
+      rows
+    );
+
+
+  if (
+    !subjects.length
+  ) {
+
+    throw new Error(
+      "Nenhuma disciplina válida encontrada."
+    );
+
+  }
+
+
+  return subjects;
+
+}
+
+
+/* =========================================================
+   APLICAR NOVA PLANILHA
+========================================================= */
+
+function applySubjects(
+  subjects,
+  sourceLabel
+) {
+
+  state.subjects =
+    subjects;
+
+
+  state.openSubjects
+    .clear();
+
+
+  normalizeProgress();
+
+  buildThemeColors();
+
+
+  saveJSON(
+    STORAGE.dataset,
+    state.subjects
+  );
+
+
+  renderAll();
+
+
+  $(
+    "dataStatus"
+  ).textContent =
+    sourceLabel;
+
+}
+
+
+/* =========================================================
+   CARREGAR Estudos.xlsx AUTOMATICAMENTE
+========================================================= */
+
+async function tryLoadRootSpreadsheet() {
+
+  if (
+    typeof XLSX ===
+    "undefined"
+  ) {
+
+    return;
+
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+
+        "./Estudos.xlsx",
+
+        {
+          cache:
+            "no-store"
+        }
+
+      );
+
+
+    if (
+      !response.ok
+    ) {
+
+      return;
+
+    }
+
+
+    const buffer =
+      await response
+        .arrayBuffer();
+
+
+    const subjects =
+      parseWorkbook(
+        buffer
+      );
+
+
+    applySubjects(
+
+      subjects,
+
+      "Dados sincronizados com Estudos.xlsx."
+
+    );
+
+  }
+
+  catch (error) {
+
+    /*
+     * Se o usuário abrir diretamente no computador
+     * usando file://, o navegador pode impedir fetch.
+     *
+     * Nesse caso o dashboard continua funcionando
+     * normalmente com os dados armazenados.
+     */
+
+    console.info(
+      "Estudos.xlsx não foi carregado automaticamente."
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   IMPORTAR XLSX MANUALMENTE
+========================================================= */
+
+async function importSpreadsheet(
+  event
+) {
+
+  const file =
+    event.target
+      .files?.[
+        0
+      ];
+
+
+  if (
+    !file
+  ) {
+
+    return;
+
+  }
+
+
+  try {
+
+    const buffer =
+      await file
+        .arrayBuffer();
+
+
+    const subjects =
+      parseWorkbook(
+        buffer
+      );
+
+
+    applySubjects(
+
+      subjects,
+
+      `Planilha atualizada: ${file.name}`
+
+    );
+
+
+    showToast(
+      "Planilha atualizada com sucesso.",
+      false
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(
+      error
+    );
+
+
+    showToast(
+
+      "Não consegui ler a planilha. Verifique as colunas Disciplina, Tema e Aulas totais.",
+
+      false
+
+    );
+
+  }
+
+  finally {
+
+    event.target.value =
+      "";
+
+  }
+
+}
+
+
+/* =========================================================
+   LIMPAR PROGRESSO INVÁLIDO
+========================================================= */
+
+function normalizeProgress() {
+
+  const validIds =
+    new Set(
+
+      state.subjects.map(
+        subject =>
+          subject.id
+      )
+
+    );
+
+
+  Object.keys(
+    state.progress
+  ).forEach(
+    id => {
+
+      if (
+        !validIds.has(
+          id
+        )
+      ) {
+
+        delete state.progress[
+          id
+        ];
+
+      }
+
+    }
+  );
+
+
+  state.subjects.forEach(
+    subject => {
+
+      const cleaned = [
+
+        ...getCompletedSet(
+          subject.id
+        )
+
+      ]
+
+        .map(
+          Number
+        )
+
+        .filter(
+          lesson =>
+
+            Number.isInteger(
+              lesson
+            )
+
+            &&
+
+            lesson >= 1
+
+            &&
+
+            lesson <=
+              subject.total
+        )
+
+        .sort(
+          (
+            a,
+            b
+          ) =>
+            a - b
+        );
+
+
+      state.progress[
+        subject.id
+      ] =
+        cleaned;
+
+    }
+  );
+
+
+  saveJSON(
+    STORAGE.progress,
+    state.progress
+  );
+
+}
+
+
+/* =========================================================
+   MARCAR UMA AULA
 ========================================================= */
 
 function setLesson(
+
   subjectId,
+
   lesson,
-  checked,
+
+  completed,
+
   options = {}
+
 ) {
+
   const subject =
     state.subjects.find(
       item =>
@@ -1652,15 +1716,28 @@ function setLesson(
 
 
   if (
-    !subject ||
+
+    !subject
+
+    ||
+
     !Number.isInteger(
       lesson
-    ) ||
-    lesson < 1 ||
+    )
+
+    ||
+
+    lesson < 1
+
+    ||
+
     lesson >
       subject.total
+
   ) {
+
     return;
+
   }
 
 
@@ -1670,1073 +1747,197 @@ function setLesson(
     );
 
 
-  const wasChecked =
+  const previous =
     set.has(
       lesson
     );
 
 
   if (
-    wasChecked ===
-    checked
+    previous ===
+    completed
   ) {
+
     return;
+
   }
 
 
-  if (checked) {
-    set.add(lesson);
-  } else {
-    set.delete(lesson);
+  if (
+    completed
+  ) {
+
+    set.add(
+      lesson
+    );
+
+  }
+
+  else {
+
+    set.delete(
+      lesson
+    );
+
   }
 
 
   state.progress[
     subjectId
-  ] =
-    [...set]
-      .sort(
-        (a, b) =>
-          a - b
-      );
+  ] = [
+
+    ...set
+
+  ].sort(
+    (
+      a,
+      b
+    ) =>
+      a - b
+  );
 
 
-  saveJson(
+  state.lastAction = {
+
+    subjectId,
+
+    lesson,
+
+    previous
+
+  };
+
+
+  saveJSON(
     STORAGE.progress,
     state.progress
   );
 
 
-  recordEvent(
-    subjectId,
-    lesson,
-    checked
-      ? 1
-      : -1
-  );
-
-
-  state.lastAction = {
-    subjectId,
-    lesson,
-    previous:
-      wasChecked
-  };
-
-
-  /*
-   * NÃO chama renderFilters().
-   * Assim o filtro selecionado continua ativo.
-   */
-  renderToday();
-
-  renderWeek();
-
-  renderFilteredDashboard();
+  renderAll();
 
 
   if (
-    options.toast
+    options.toast !==
+    false
   ) {
+
     showToast(
-      `${subject.name}: Aula ${lesson} ${
-        checked
+
+      `${subject.name}: aula ${lesson} ${
+        completed
           ? "concluída"
           : "desmarcada"
       }.`
+
     );
+
   }
+
 }
 
 
 /* =========================================================
-   ABRIR / FECHAR LISTA DE AULAS
+   +1
 ========================================================= */
 
-function toggleLessonPanel(
+function addNextLesson(
   subjectId
 ) {
+
+  const subject =
+    state.subjects.find(
+      item =>
+        item.id ===
+        subjectId
+    );
+
+
   if (
-    state.openLessons.has(
-      subjectId
-    )
+    !subject
   ) {
-    state.openLessons.delete(
-      subjectId
-    );
-
-  } else {
-    state.openLessons.add(
-      subjectId
-    );
-  }
-
-
-  renderDisciplines(
-    filteredSubjects()
-  );
-}
-
-
-/* =========================================================
-   HISTÓRICO
-========================================================= */
-
-function recordEvent(
-  subjectId,
-  lesson,
-  delta
-) {
-  state.events.push({
-    subjectId,
-    lesson,
-    delta,
-    timestamp:
-      new Date()
-        .toISOString()
-  });
-
-
-  const cutoff =
-    Date.now() -
-    (
-      120 *
-      24 *
-      60 *
-      60 *
-      1000
-    );
-
-
-  state.events =
-    state.events.filter(
-      event =>
-        new Date(
-          event.timestamp
-        ).getTime() >=
-        cutoff
-    );
-
-
-  saveJson(
-    STORAGE.events,
-    state.events
-  );
-}
-
-
-function countEventsSince(
-  days,
-  subjectIds = null
-) {
-  const cutoff =
-    new Date();
-
-
-  cutoff.setHours(
-    0,
-    0,
-    0,
-    0
-  );
-
-
-  cutoff.setDate(
-    cutoff.getDate() -
-    (days - 1)
-  );
-
-
-  return state.events
-    .filter(
-      event => {
-        const eventDate =
-          new Date(
-            event.timestamp
-          );
-
-
-        const subjectOk =
-          !subjectIds ||
-          subjectIds.has(
-            event.subjectId
-          );
-
-
-        return (
-          eventDate >= cutoff &&
-          subjectOk
-        );
-      }
-    )
-
-    .reduce(
-      (sum, event) =>
-        sum + event.delta,
-      0
-    );
-}
-
-
-/* =========================================================
-   SEMANA
-========================================================= */
-
-function renderWeek() {
-  const today =
-    getDayKey();
-
-
-  el(
-    "weekGrid"
-  ).innerHTML =
-    DAY_KEYS
-      .map(
-        day => {
-          const subjects =
-            subjectsForDay(day);
-
-
-          const isSunday =
-            day === "domingo";
-
-
-          const isSaturday =
-            day === "sabado";
-
-
-          return `
-            <article
-              class="
-                day-card
-                ${
-                  day === today
-                    ? "is-today"
-                    : ""
-                }
-              "
-            >
-
-              <div
-                class="day-card__name"
-              >
-
-                <span>
-                  ${DAY_LABELS[day]}
-                </span>
-
-
-                ${
-                  day === today
-                    ? `
-                      <small>
-                        HOJE
-                      </small>
-                    `
-                    : isSaturday
-                      ? `
-                        <small>
-                          FIXO
-                        </small>
-                      `
-                      : isSunday
-                        ? `
-                          <small>
-                            AUTO
-                          </small>
-                        `
-                        : ""
-                }
-
-              </div>
-
-
-              ${
-                subjects.length
-                  ? subjects
-                      .map(
-                        subject => `
-                          <div
-                            class="day-subject"
-                          >
-
-                            <span>
-                              ${escapeHtml(
-                                subject.theme
-                              )}
-                              ·
-                              ${percent(
-                                subject
-                              )}%
-                            </span>
-
-                            <strong>
-                              ${escapeHtml(
-                                subject.name
-                              )}
-                            </strong>
-
-                          </div>
-                        `
-                      )
-                      .join("")
-                  : `
-                    <p
-                      class="day-card__empty"
-                    >
-                      Sem disciplina definida.
-                    </p>
-                  `
-              }
-
-            </article>
-          `;
-        }
-      )
-      .join("");
-}
-
-
-/* =========================================================
-   CHART.JS
-========================================================= */
-
-function destroyChart(key) {
-  if (
-    state.charts[key]
-  ) {
-    state.charts[
-      key
-    ].destroy();
-
-    delete state.charts[
-      key
-    ];
-  }
-}
-
-
-function renderCharts(
-  subjects =
-    filteredSubjects()
-) {
-  if (
-    typeof Chart ===
-    "undefined"
-  ) {
-    console.warn(
-      "Chart.js não carregado."
-    );
 
     return;
+
   }
 
 
-  Chart.defaults
-    .font
-    .family =
-      '"DM Sans", system-ui, sans-serif';
+  const lesson =
+    nextLesson(
+      subject
+    );
 
 
-  Chart.defaults.color =
-    "#777180";
+  if (
+    lesson === null
+  ) {
+
+    return;
+
+  }
 
 
-  Chart.defaults
-    .animation
-    .duration =
-      220;
+  setLesson(
 
+    subjectId,
 
-  renderOverallChart(
-    subjects
+    lesson,
+
+    true
+
   );
 
-  renderThemeChart(
-    subjects
-  );
-
-  renderDisciplineChart(
-    subjects
-  );
-
-  renderPaceChart(
-    subjects
-  );
 }
 
 
 /* =========================================================
-   GRÁFICO GERAL
+   -1
 ========================================================= */
 
-function renderOverallChart(
-  subjects
+function removeLastLesson(
+  subjectId
 ) {
-  const summary =
-    totals(subjects);
 
+  const completed = [
 
-  destroyChart(
-    "overall"
+    ...getCompletedSet(
+      subjectId
+    )
+
+  ].sort(
+    (
+      a,
+      b
+    ) =>
+      b - a
   );
 
 
-  state.charts.overall =
-    new Chart(
-      el(
-        "overallChart"
-      ),
-      {
-        type:
-          "doughnut",
-
-        data: {
-          labels: [
-            "Concluído",
-            "Restante"
-          ],
-
-          datasets: [
-            {
-              data: [
-                summary.done,
-                summary.remaining
-              ],
-
-              backgroundColor: [
-                "#7657d8",
-                "#ece9f1"
-              ],
-
-              borderWidth: 0,
-
-              hoverOffset: 2
-            }
-          ]
-        },
-
-        options: {
-          responsive: true,
-
-          maintainAspectRatio:
-            false,
-
-          cutout:
-            "76%",
-
-          plugins: {
-            legend: {
-              display:
-                false
-            },
-
-            tooltip: {
-              callbacks: {
-                label:
-                  context =>
-                    ` ${context.label}: ${context.raw} aulas`
-              }
-            }
-          }
-        }
-      }
-    );
-}
+  const lesson =
+    completed[
+      0
+    ];
 
 
-/* =========================================================
-   GRÁFICO POR TEMA
-========================================================= */
+  if (
+    !lesson
+  ) {
 
-function renderThemeChart(
-  subjects
-) {
-  const grouped = {};
+    return;
 
-
-  subjects.forEach(
-    subject => {
-      if (
-        !grouped[
-          subject.theme
-        ]
-      ) {
-        grouped[
-          subject.theme
-        ] = {
-          done: 0,
-          total: 0
-        };
-      }
+  }
 
 
-      grouped[
-        subject.theme
-      ].done +=
-        completedCount(
-          subject
-        );
+  setLesson(
 
+    subjectId,
 
-      grouped[
-        subject.theme
-      ].total +=
-        subject.total;
-    }
+    lesson,
+
+    false
+
   );
 
-
-  const labels =
-    Object.keys(
-      grouped
-    );
-
-
-  const data =
-    labels.map(
-      label => {
-        const item =
-          grouped[label];
-
-        return item.total
-          ? Math.round(
-              (
-                item.done /
-                item.total
-              ) * 100
-            )
-          : 0;
-      }
-    );
-
-
-  destroyChart(
-    "theme"
-  );
-
-
-  state.charts.theme =
-    new Chart(
-      el(
-        "themeChart"
-      ),
-      {
-        type: "bar",
-
-        data: {
-          labels,
-
-          datasets: [
-            {
-              data,
-
-              backgroundColor:
-                labels.map(
-                  (_, index) =>
-                    [
-                      "#7657d8",
-                      "#8f78dc",
-                      "#a897ed"
-                    ][
-                      index % 3
-                    ]
-                ),
-
-              borderRadius:
-                9,
-
-              borderSkipped:
-                false,
-
-              maxBarThickness:
-                48
-            }
-          ]
-        },
-
-        options: {
-          responsive:
-            true,
-
-          maintainAspectRatio:
-            false,
-
-          plugins: {
-            legend: {
-              display:
-                false
-            },
-
-            tooltip: {
-              callbacks: {
-                label:
-                  context =>
-                    ` ${context.raw}% concluído`
-              }
-            }
-          },
-
-          scales: {
-            y: {
-              beginAtZero:
-                true,
-
-              max: 100,
-
-              grid: {
-                color:
-                  "rgba(45,37,70,.06)"
-              },
-
-              border: {
-                display:
-                  false
-              },
-
-              ticks: {
-                callback:
-                  value =>
-                    `${value}%`
-              }
-            },
-
-            x: {
-              grid: {
-                display:
-                  false
-              },
-
-              border: {
-                display:
-                  false
-              }
-            }
-          }
-        }
-      }
-    );
-}
-
-
-/* =========================================================
-   GRÁFICO POR DISCIPLINA
-========================================================= */
-
-function renderDisciplineChart(
-  subjects
-) {
-  const sorted =
-    [...subjects]
-      .sort(
-        (a, b) =>
-          percent(a) -
-            percent(b) ||
-          a.name.localeCompare(
-            b.name,
-            "pt-BR"
-          )
-      );
-
-
-  destroyChart(
-    "discipline"
-  );
-
-
-  state.charts.discipline =
-    new Chart(
-      el(
-        "disciplineChart"
-      ),
-      {
-        type: "bar",
-
-        data: {
-          labels:
-            sorted.map(
-              subject =>
-                compactName(
-                  subject.name
-                )
-            ),
-
-          datasets: [
-            {
-              data:
-                sorted.map(
-                  subject =>
-                    percent(subject)
-                ),
-
-              backgroundColor:
-                sorted.map(
-                  subject =>
-                    percent(subject) ===
-                    100
-                      ? "#2d9a71"
-                      : "#7657d8"
-                ),
-
-              borderRadius:
-                8,
-
-              borderSkipped:
-                false,
-
-              maxBarThickness:
-                25
-            }
-          ]
-        },
-
-        options: {
-          indexAxis:
-            "y",
-
-          responsive:
-            true,
-
-          maintainAspectRatio:
-            false,
-
-          plugins: {
-            legend: {
-              display:
-                false
-            },
-
-            tooltip: {
-              callbacks: {
-                title:
-                  items =>
-                    sorted[
-                      items[0]
-                        ?.dataIndex
-                    ]?.name ||
-                    "",
-
-                label:
-                  context =>
-                    ` ${context.raw}% concluído`
-              }
-            }
-          },
-
-          scales: {
-            x: {
-              beginAtZero:
-                true,
-
-              max: 100,
-
-              grid: {
-                color:
-                  "rgba(45,37,70,.06)"
-              },
-
-              border: {
-                display:
-                  false
-              },
-
-              ticks: {
-                callback:
-                  value =>
-                    `${value}%`
-              }
-            },
-
-            y: {
-              grid: {
-                display:
-                  false
-              },
-
-              border: {
-                display:
-                  false
-              },
-
-              ticks: {
-                autoSkip:
-                  false,
-
-                font: {
-                  size: 11
-                }
-              }
-            }
-          }
-        }
-      }
-    );
-}
-
-
-/* =========================================================
-   GRÁFICO DE RITMO
-========================================================= */
-
-function renderPaceChart(
-  subjects
-) {
-  const subjectIds =
-    new Set(
-      subjects.map(
-        subject =>
-          subject.id
-      )
-    );
-
-
-  const days =
-    Array.from(
-      {
-        length: 14
-      },
-      (_, index) => {
-        const date =
-          new Date();
-
-
-        date.setHours(
-          0,
-          0,
-          0,
-          0
-        );
-
-
-        date.setDate(
-          date.getDate() -
-          (13 - index)
-        );
-
-
-        return date;
-      }
-    );
-
-
-  const points =
-    days.map(
-      day => {
-        const next =
-          new Date(day);
-
-
-        next.setDate(
-          next.getDate() + 1
-        );
-
-
-        return state.events
-          .filter(
-            event => {
-              const time =
-                new Date(
-                  event.timestamp
-                );
-
-
-              return (
-                time >= day &&
-                time < next &&
-                subjectIds.has(
-                  event.subjectId
-                )
-              );
-            }
-          )
-
-          .reduce(
-            (sum, event) =>
-              sum +
-              event.delta,
-            0
-          );
-      }
-    );
-
-
-  destroyChart(
-    "pace"
-  );
-
-
-  state.charts.pace =
-    new Chart(
-      el(
-        "paceChart"
-      ),
-      {
-        type:
-          "line",
-
-        data: {
-          labels:
-            days.map(
-              date =>
-                new Intl
-                  .DateTimeFormat(
-                    "pt-BR",
-                    {
-                      day:
-                        "2-digit",
-                      month:
-                        "2-digit"
-                    }
-                  )
-                  .format(date)
-            ),
-
-          datasets: [
-            {
-              data:
-                points,
-
-              borderColor:
-                "#7657d8",
-
-              backgroundColor:
-                "rgba(118,87,216,.10)",
-
-              fill:
-                true,
-
-              tension:
-                0.35,
-
-              pointRadius:
-                3,
-
-              pointHoverRadius:
-                5,
-
-              pointBackgroundColor:
-                "#7657d8"
-            }
-          ]
-        },
-
-        options: {
-          responsive:
-            true,
-
-          maintainAspectRatio:
-            false,
-
-          plugins: {
-            legend: {
-              display:
-                false
-            },
-
-            tooltip: {
-              callbacks: {
-                label:
-                  context =>
-                    ` ${context.raw} aula${
-                      Math.abs(
-                        context.raw
-                      ) === 1
-                        ? ""
-                        : "s"
-                    }`
-              }
-            }
-          },
-
-          scales: {
-            y: {
-              beginAtZero:
-                true,
-
-              suggestedMax:
-                4,
-
-              grid: {
-                color:
-                  "rgba(45,37,70,.06)"
-              },
-
-              border: {
-                display:
-                  false
-              },
-
-              ticks: {
-                precision:
-                  0
-              }
-            },
-
-            x: {
-              grid: {
-                display:
-                  false
-              },
-
-              border: {
-                display:
-                  false
-              },
-
-              ticks: {
-                maxRotation:
-                  0,
-
-                autoSkip:
-                  true,
-
-                maxTicksLimit:
-                  7
-              }
-            }
-          }
-        }
-      }
-    );
-}
-
-
-/* =========================================================
-   TOAST
-========================================================= */
-
-function showToast(
-  message
-) {
-  clearTimeout(
-    state.toastTimer
-  );
-
-
-  el(
-    "toastMessage"
-  ).textContent =
-    message;
-
-
-  el(
-    "toast"
-  ).classList.add(
-    "is-visible"
-  );
-
-
-  state.toastTimer =
-    setTimeout(
-      () => {
-        el(
-          "toast"
-        ).classList.remove(
-          "is-visible"
-        );
-      },
-      3800
-    );
 }
 
 
@@ -2745,17 +1946,24 @@ function showToast(
 ========================================================= */
 
 function undoLastAction() {
+
   if (
     !state.lastAction
   ) {
+
     return;
+
   }
 
 
   const {
+
     subjectId,
+
     lesson,
+
     previous
+
   } =
     state.lastAction;
 
@@ -2766,35 +1974,37 @@ function undoLastAction() {
     );
 
 
-  if (previous) {
-    set.add(lesson);
-  } else {
-    set.delete(lesson);
+  if (
+    previous
+  ) {
+
+    set.add(
+      lesson
+    );
+
+  }
+
+  else {
+
+    set.delete(
+      lesson
+    );
+
   }
 
 
   state.progress[
     subjectId
-  ] =
-    [...set]
-      .sort(
-        (a, b) =>
-          a - b
-      );
+  ] = [
 
+    ...set
 
-  saveJson(
-    STORAGE.progress,
-    state.progress
-  );
-
-
-  recordEvent(
-    subjectId,
-    lesson,
-    previous
-      ? 1
-      : -1
+  ].sort(
+    (
+      a,
+      b
+    ) =>
+      a - b
   );
 
 
@@ -2802,631 +2012,1668 @@ function undoLastAction() {
     null;
 
 
-  el(
+  saveJSON(
+    STORAGE.progress,
+    state.progress
+  );
+
+
+  renderAll();
+
+  hideToast();
+
+}
+
+
+/* =========================================================
+   DISCIPLINAS DE HOJE
+========================================================= */
+
+function subjectsForToday() {
+
+  const day =
+    getDayKey();
+
+
+  /*
+   * Primeiro tenta encontrar uma agenda
+   * definida dentro da planilha.
+   */
+
+  const spreadsheetSchedule =
+    state.subjects.filter(
+      subject =>
+
+        Array.isArray(
+          subject.days
+        )
+
+        &&
+
+        subject.days.includes(
+          day
+        )
+    );
+
+
+  if (
+    spreadsheetSchedule.length
+  ) {
+
+    return spreadsheetSchedule;
+
+  }
+
+
+  /*
+   * Caso a planilha não possua Dia/Dias,
+   * usa o plano padrão.
+   */
+
+  const fallbackNames =
+    FALLBACK_WEEK_PLAN[
+      day
+    ]
+    ||
+    [];
+
+
+  if (
+    fallbackNames.length
+  ) {
+
+    const normalizedNames =
+      new Set(
+
+        fallbackNames.map(
+          normalizeText
+        )
+
+      );
+
+
+    return state.subjects.filter(
+      subject =>
+
+        normalizedNames.has(
+          normalizeText(
+            subject.name
+          )
+        )
+    );
+
+  }
+
+
+  /*
+   * Domingo:
+   * sugere automaticamente a disciplina
+   * com menor porcentagem concluída.
+   */
+
+  return [
+
+    ...state.subjects
+
+  ]
+
+    .filter(
+      subject =>
+        remainingCount(
+          subject
+        )
+        >
+        0
+    )
+
+    .sort(
+      (
+        a,
+        b
+      ) =>
+
+        percentage(a)
+        -
+        percentage(b)
+
+        ||
+
+        remainingCount(b)
+        -
+        remainingCount(a)
+    )
+
+    .slice(
+      0,
+      1
+    );
+
+}
+
+
+/* =========================================================
+   CARD HOJE
+========================================================= */
+
+function renderToday() {
+
+  const day =
+    getDayKey();
+
+
+  const subjects =
+    subjectsForToday();
+
+
+  $(
+    "todayLabel"
+  ).textContent =
+
+    `HOJE · ${getDayLabel(day).toUpperCase()}`;
+
+
+  if (
+    !subjects.length
+  ) {
+
+    $(
+      "todayTitle"
+    ).textContent =
+      "Dia livre";
+
+
+    $(
+      "todayMeta"
+    ).textContent =
+      "Nenhuma disciplina foi programada para hoje.";
+
+
+    $(
+      "todayAction"
+    ).innerHTML =
+      "";
+
+
+    return;
+
+  }
+
+
+  const title =
+    subjects
+
+      .map(
+        subject =>
+          subject.name
+      )
+
+      .join(
+        " + "
+      );
+
+
+  $(
+    "todayTitle"
+  ).textContent =
+    title;
+
+
+  const pendingSubjects =
+    subjects.filter(
+      subject =>
+        nextLesson(
+          subject
+        )
+        !==
+        null
+    );
+
+
+  if (
+    !pendingSubjects.length
+  ) {
+
+    $(
+      "todayMeta"
+    ).textContent =
+      "Tudo concluído nas disciplinas previstas para hoje.";
+
+
+    $(
+      "todayAction"
+    ).innerHTML = `
+
+      <button
+        class="today-button"
+        type="button"
+        disabled
+      >
+        Concluído
+      </button>
+
+    `;
+
+
+    return;
+
+  }
+
+
+  const primarySubject =
+    pendingSubjects[
+      0
+    ];
+
+
+  const lesson =
+    nextLesson(
+      primarySubject
+    );
+
+
+  if (
+    subjects.length === 1
+  ) {
+
+    $(
+      "todayMeta"
+    ).textContent =
+
+      `Próxima: aula ${lesson} de ${primarySubject.total} · ${percentage(primarySubject)}% concluído.`;
+
+  }
+
+  else {
+
+    $(
+      "todayMeta"
+    ).textContent =
+
+      `${pendingSubjects.length} disciplinas previstas · comece por ${primarySubject.name}, aula ${lesson}.`;
+
+  }
+
+
+  $(
+    "todayAction"
+  ).innerHTML = `
+
+    <button
+
+      class="today-button"
+
+      id="todayCompleteButton"
+
+      type="button"
+
+      data-subject-id="${
+        primarySubject.id
+      }"
+
+    >
+
+      Marcar próxima aula
+
+    </button>
+
+  `;
+
+
+  $(
+    "todayCompleteButton"
+  )?.addEventListener(
+
+    "click",
+
+    () => {
+
+      addNextLesson(
+        primarySubject.id
+      );
+
+    }
+
+  );
+
+}
+
+
+/* =========================================================
+   RESUMO
+========================================================= */
+
+function renderSummary() {
+
+  const summary =
+    totals();
+
+
+  $(
+    "overallPercent"
+  ).textContent =
+
+    `${summary.percentage}%`;
+
+
+  $(
+    "overallProgressBar"
+  ).style.width =
+
+    `${summary.percentage}%`;
+
+
+  $(
+    "overallDetail"
+  ).textContent =
+
+    `${summary.completed} de ${summary.total} aulas concluídas`;
+
+
+  $(
+    "completedTotal"
+  ).textContent =
+
+    summary.completed
+      .toLocaleString(
+        "pt-BR"
+      );
+
+
+  $(
+    "remainingTotal"
+  ).textContent =
+
+    summary.remaining
+      .toLocaleString(
+        "pt-BR"
+      );
+
+}
+
+
+/* =========================================================
+   AGRUPAR POR TEMA
+========================================================= */
+
+function themeGroups() {
+
+  const groups =
+    new Map();
+
+
+  state.subjects.forEach(
+    subject => {
+
+      if (
+        !groups.has(
+          subject.theme
+        )
+      ) {
+
+        groups.set(
+          subject.theme,
+          []
+        );
+
+      }
+
+
+      groups
+        .get(
+          subject.theme
+        )
+        .push(
+          subject
+        );
+
+    }
+  );
+
+
+  return [
+
+    ...groups.entries()
+
+  ].sort(
+    (
+      [themeA],
+      [themeB]
+    ) =>
+
+      themeA.localeCompare(
+        themeB,
+        "pt-BR"
+      )
+  );
+
+}
+
+
+/* =========================================================
+   DESTRUIR ROSCAS ANTIGAS
+========================================================= */
+
+function destroyThemeCharts() {
+
+  state.themeCharts.forEach(
+    chart =>
+      chart.destroy()
+  );
+
+
+  state.themeCharts =
+    [];
+
+}
+
+
+/* =========================================================
+   ROSCAS DINÂMICAS
+========================================================= */
+
+function renderThemes() {
+
+  destroyThemeCharts();
+
+
+  const groups =
+    themeGroups();
+
+
+  $(
+    "themeGrid"
+  ).innerHTML =
+
+    groups
+
+      .map(
+        (
+          [
+            theme,
+            subjects
+          ],
+          index
+        ) => {
+
+          const summary =
+            totals(
+              subjects
+            );
+
+
+          const color =
+            themeColor(
+              theme
+            );
+
+
+          return `
+
+            <article
+
+              class="theme-card"
+
+              style="
+                --theme-color:${color}
+              "
+
+            >
+
+              <div
+                class="theme-chart-wrap"
+              >
+
+                <canvas
+
+                  id="themeChart${index}"
+
+                  role="img"
+
+                  aria-label="${escapeHTML(theme)}: ${summary.percentage}% concluído"
+
+                ></canvas>
+
+
+                <div
+                  class="theme-chart-center"
+                  aria-hidden="true"
+                >
+
+                  <strong>
+                    ${summary.percentage}%
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+              <div
+                class="theme-card__body"
+              >
+
+                <h3>
+
+                  <span
+                    class="theme-dot"
+                  ></span>
+
+                  ${escapeHTML(theme)}
+
+                </h3>
+
+
+                <p>
+
+                  ${summary.completed}
+                  de
+                  ${summary.total}
+                  aulas
+
+                  ·
+
+                  ${subjects.length}
+
+                  ${
+                    subjects.length === 1
+                      ? "disciplina"
+                      : "disciplinas"
+                  }
+
+                </p>
+
+              </div>
+
+            </article>
+
+          `;
+
+        }
+      )
+
+      .join("");
+
+
+  if (
+    typeof Chart ===
+    "undefined"
+  ) {
+
+    return;
+
+  }
+
+
+  groups.forEach(
+    (
+      [
+        theme,
+        subjects
+      ],
+      index
+    ) => {
+
+      const summary =
+        totals(
+          subjects
+        );
+
+
+      const color =
+        themeColor(
+          theme
+        );
+
+
+      const canvas =
+        $(
+          `themeChart${index}`
+        );
+
+
+      if (
+        !canvas
+      ) {
+
+        return;
+
+      }
+
+
+      const chart =
+        new Chart(
+
+          canvas,
+
+          {
+
+            type:
+              "doughnut",
+
+
+            data: {
+
+              labels: [
+
+                "Concluído",
+
+                "Restante"
+
+              ],
+
+
+              datasets: [
+
+                {
+
+                  data: [
+
+                    summary.completed,
+
+                    summary.remaining
+
+                  ],
+
+
+                  backgroundColor: [
+
+                    color,
+
+                    "#ece9f0"
+
+                  ],
+
+
+                  borderWidth:
+                    0,
+
+
+                  hoverOffset:
+                    2
+
+                }
+
+              ]
+
+            },
+
+
+            options: {
+
+              responsive:
+                true,
+
+
+              maintainAspectRatio:
+                false,
+
+
+              cutout:
+                "76%",
+
+
+              animation: {
+
+                duration:
+                  280
+
+              },
+
+
+              plugins: {
+
+                legend: {
+
+                  display:
+                    false
+
+                },
+
+
+                tooltip: {
+
+                  callbacks: {
+
+                    label:
+                      context =>
+
+                        ` ${context.label}: ${context.raw} aulas`
+
+                  }
+
+                }
+
+              }
+
+            }
+
+          }
+
+        );
+
+
+      state.themeCharts.push(
+        chart
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   AULAS RESTANTES POR DISCIPLINA
+========================================================= */
+
+function renderRemainingChart() {
+
+  if (
+    typeof Chart ===
+    "undefined"
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    state.remainingChart
+  ) {
+
+    state.remainingChart
+      .destroy();
+
+
+    state.remainingChart =
+      null;
+
+  }
+
+
+  const sorted = [
+
+    ...state.subjects
+
+  ].sort(
+    (
+      a,
+      b
+    ) =>
+
+      remainingCount(b)
+      -
+      remainingCount(a)
+
+      ||
+
+      a.name.localeCompare(
+        b.name,
+        "pt-BR"
+      )
+  );
+
+
+  const container =
+    $(
+      "remainingChartContainer"
+    );
+
+
+  container.style.height =
+
+    `${Math.max(
+      300,
+      sorted.length * 42 + 60
+    )}px`;
+
+
+  state.remainingChart =
+    new Chart(
+
+      $(
+        "remainingChart"
+      ),
+
+      {
+
+        type:
+          "bar",
+
+
+        data: {
+
+          labels:
+
+            sorted.map(
+              subject =>
+                subject.name
+            ),
+
+
+          datasets: [
+
+            {
+
+              data:
+
+                sorted.map(
+                  subject =>
+                    remainingCount(
+                      subject
+                    )
+                ),
+
+
+              backgroundColor:
+
+                sorted.map(
+                  subject =>
+                    themeColor(
+                      subject.theme
+                    )
+                ),
+
+
+              borderRadius:
+                8,
+
+
+              borderSkipped:
+                false,
+
+
+              maxBarThickness:
+                22
+
+            }
+
+          ]
+
+        },
+
+
+        options: {
+
+          indexAxis:
+            "y",
+
+
+          responsive:
+            true,
+
+
+          maintainAspectRatio:
+            false,
+
+
+          animation: {
+
+            duration:
+              280
+
+          },
+
+
+          plugins: {
+
+            legend: {
+
+              display:
+                false
+
+            },
+
+
+            tooltip: {
+
+              callbacks: {
+
+                label:
+                  context =>
+
+                    ` ${context.raw} aulas restantes`
+
+              }
+
+            }
+
+          },
+
+
+          scales: {
+
+            x: {
+
+              beginAtZero:
+                true,
+
+
+              grid: {
+
+                color:
+                  "rgba(44, 38, 55, 0.06)"
+
+              },
+
+
+              border: {
+
+                display:
+                  false
+
+              },
+
+
+              ticks: {
+
+                precision:
+                  0
+
+              }
+
+            },
+
+
+            y: {
+
+              grid: {
+
+                display:
+                  false
+
+              },
+
+
+              border: {
+
+                display:
+                  false
+
+              },
+
+
+              ticks: {
+
+                autoSkip:
+                  false,
+
+
+                color:
+                  "#5f5a65",
+
+
+                font: {
+
+                  size:
+                    11
+
+                }
+
+              }
+
+            }
+
+          }
+
+        }
+
+      }
+
+    );
+
+}
+
+
+/* =========================================================
+   AULAS INDIVIDUAIS
+========================================================= */
+
+function lessonGridTemplate(
+  subject
+) {
+
+  const completed =
+    getCompletedSet(
+      subject.id
+    );
+
+
+  return `
+
+    <div
+      class="lesson-panel"
+    >
+
+      <p
+        class="lesson-panel__hint"
+      >
+        Toque em uma aula para marcar ou desmarcar.
+      </p>
+
+
+      <div
+        class="lesson-grid"
+      >
+
+        ${
+          Array.from(
+
+            {
+              length:
+                subject.total
+            },
+
+            (
+              _,
+              index
+            ) =>
+              index + 1
+
+          )
+
+            .map(
+              lesson => `
+
+                <button
+
+                  class="
+                    lesson-button
+                    ${
+                      completed.has(
+                        lesson
+                      )
+                        ? "is-complete"
+                        : ""
+                    }
+                  "
+
+                  type="button"
+
+                  data-action="lesson"
+
+                  data-subject-id="${
+                    subject.id
+                  }"
+
+                  data-lesson="${
+                    lesson
+                  }"
+
+                  aria-pressed="${
+                    completed.has(
+                      lesson
+                    )
+                  }"
+
+                >
+
+                  ${lesson}
+
+                </button>
+
+              `
+            )
+
+            .join("")
+        }
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================================================
+   CARD DISCIPLINA
+========================================================= */
+
+function subjectTemplate(
+  subject
+) {
+
+  const completed =
+    completedCount(
+      subject
+    );
+
+
+  const percent =
+    percentage(
+      subject
+    );
+
+
+  const color =
+    themeColor(
+      subject.theme
+    );
+
+
+  const isComplete =
+    completed >=
+    subject.total;
+
+
+  const isOpen =
+    state.openSubjects
+      .has(
+        subject.id
+      );
+
+
+  return `
+
+    <article
+
+      class="subject-card"
+
+      style="
+        --theme-color:${color}
+      "
+
+    >
+
+
+      <div
+        class="subject-card__main"
+      >
+
+
+        <div>
+
+
+          <div
+            class="subject-card__heading"
+          >
+
+
+            <div
+              class="subject-card__title-wrap"
+            >
+
+
+              <span
+                class="subject-card__theme"
+              >
+
+                <span
+                  class="theme-dot"
+                ></span>
+
+                ${
+                  escapeHTML(
+                    subject.theme
+                  )
+                }
+
+              </span>
+
+
+              <h3>
+
+                ${
+                  escapeHTML(
+                    subject.name
+                  )
+                }
+
+              </h3>
+
+
+            </div>
+
+
+            <span
+              class="subject-card__percentage"
+            >
+
+              ${percent}%
+
+            </span>
+
+
+          </div>
+
+
+          <div
+            class="subject-progress"
+            aria-hidden="true"
+          >
+
+            <span
+              style="
+                width:${percent}%
+              "
+            ></span>
+
+          </div>
+
+
+          <div
+            class="subject-card__meta"
+          >
+
+            ${completed}
+            de
+            ${subject.total}
+            aulas
+
+          </div>
+
+
+        </div>
+
+
+        <div
+          class="subject-actions"
+        >
+
+
+          <button
+
+            class="icon-button"
+
+            type="button"
+
+            data-action="minus"
+
+            data-subject-id="${
+              subject.id
+            }"
+
+            aria-label="Desmarcar a última aula de ${escapeHTML(subject.name)}"
+
+            ${
+              completed === 0
+                ? "disabled"
+                : ""
+            }
+
+          >
+
+            −
+
+          </button>
+
+
+          <button
+
+            class="primary-button"
+
+            type="button"
+
+            data-action="plus"
+
+            data-subject-id="${
+              subject.id
+            }"
+
+            ${
+              isComplete
+                ? "disabled"
+                : ""
+            }
+
+          >
+
+            ${
+              isComplete
+                ? "Concluída"
+                : "+1 aula"
+            }
+
+          </button>
+
+
+          <button
+
+            class="icon-button"
+
+            type="button"
+
+            data-action="plus"
+
+            data-subject-id="${
+              subject.id
+            }"
+
+            aria-label="Marcar a próxima aula de ${escapeHTML(subject.name)}"
+
+            ${
+              isComplete
+                ? "disabled"
+                : ""
+            }
+
+          >
+
+            +
+
+          </button>
+
+
+          <button
+
+            class="details-button"
+
+            type="button"
+
+            data-action="details"
+
+            data-subject-id="${
+              subject.id
+            }"
+
+            aria-expanded="${
+              isOpen
+            }"
+
+          >
+
+            ${
+              isOpen
+                ? "Ocultar aulas"
+                : "Ver aulas"
+            }
+
+          </button>
+
+
+        </div>
+
+
+      </div>
+
+
+      ${
+        isOpen
+
+          ? lessonGridTemplate(
+              subject
+            )
+
+          : ""
+      }
+
+
+    </article>
+
+  `;
+
+}
+
+
+/* =========================================================
+   RENDER DISCIPLINAS
+========================================================= */
+
+function renderSubjects() {
+
+  $(
+    "subjectCount"
+  ).textContent =
+
+    `${state.subjects.length} ${
+      state.subjects.length === 1
+        ? "disciplina"
+        : "disciplinas"
+    }`;
+
+
+  if (
+    !state.subjects.length
+  ) {
+
+    $(
+      "subjectList"
+    ).innerHTML = `
+
+      <div
+        class="empty-state"
+      >
+        Nenhuma disciplina encontrada.
+      </div>
+
+    `;
+
+
+    return;
+
+  }
+
+
+  $(
+    "subjectList"
+  ).innerHTML =
+
+    state.subjects
+
+      .map(
+        subjectTemplate
+      )
+
+      .join("");
+
+
+  /*
+   * Os eventos são adicionados NOVAMENTE
+   * depois que cada card é renderizado.
+   *
+   * Isso evita o problema anterior em que
+   * os botões paravam de funcionar.
+   */
+
+  $(
+    "subjectList"
+  )
+
+    .querySelectorAll(
+      "[data-action]"
+    )
+
+    .forEach(
+      button => {
+
+        button.addEventListener(
+
+          "click",
+
+          handleSubjectAction
+
+        );
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   CLIQUES
+========================================================= */
+
+function handleSubjectAction(
+  event
+) {
+
+  const button =
+    event.currentTarget;
+
+
+  const action =
+    button.dataset.action;
+
+
+  const subjectId =
+    button.dataset.subjectId;
+
+
+  if (
+    !subjectId
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    action ===
+    "plus"
+  ) {
+
+    addNextLesson(
+      subjectId
+    );
+
+
+    return;
+
+  }
+
+
+  if (
+    action ===
+    "minus"
+  ) {
+
+    removeLastLesson(
+      subjectId
+    );
+
+
+    return;
+
+  }
+
+
+  if (
+    action ===
+    "details"
+  ) {
+
+    if (
+      state.openSubjects.has(
+        subjectId
+      )
+    ) {
+
+      state.openSubjects.delete(
+        subjectId
+      );
+
+    }
+
+    else {
+
+      state.openSubjects.add(
+        subjectId
+      );
+
+    }
+
+
+    renderSubjects();
+
+
+    return;
+
+  }
+
+
+  if (
+    action ===
+    "lesson"
+  ) {
+
+    const lesson =
+      Number(
+        button.dataset.lesson
+      );
+
+
+    const completed =
+      getCompletedSet(
+        subjectId
+      ).has(
+        lesson
+      );
+
+
+    setLesson(
+
+      subjectId,
+
+      lesson,
+
+      !completed
+
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function showToast(
+  message,
+  showUndo =
+    true
+) {
+
+  clearTimeout(
+    state.toastTimer
+  );
+
+
+  $(
+    "toastMessage"
+  ).textContent =
+    message;
+
+
+  $(
+    "toastUndo"
+  ).hidden =
+    !showUndo;
+
+
+  $(
+    "toast"
+  ).classList.add(
+    "is-visible"
+  );
+
+
+  state.toastTimer =
+    setTimeout(
+
+      hideToast,
+
+      3600
+
+    );
+
+}
+
+
+function hideToast() {
+
+  $(
     "toast"
   ).classList.remove(
     "is-visible"
   );
 
-
-  renderAll();
-}
-
-
-/* =========================================================
-   EVENTOS ESTÁTICOS
-========================================================= */
-
-function bindStaticEvents() {
-
-  /*
-   * FILTRO POR TEMA
-   *
-   * Delegação é adequada aqui
-   * porque os chips são recriados.
-   */
-  el(
-    "themeFilters"
-  ).addEventListener(
-    "click",
-    event => {
-      const button =
-        event.target.closest(
-          '[data-filter-type="theme"]'
-        );
-
-
-      if (
-        !button ||
-        !el(
-          "themeFilters"
-        ).contains(button)
-      ) {
-        return;
-      }
-
-
-      toggleFilter(
-        "theme",
-        button.dataset.value
-      );
-    }
-  );
-
-
-  /*
-   * FILTRO POR DIA
-   */
-  el(
-    "dayFilters"
-  ).addEventListener(
-    "click",
-    event => {
-      const button =
-        event.target.closest(
-          '[data-filter-type="day"]'
-        );
-
-
-      if (
-        !button ||
-        !el(
-          "dayFilters"
-        ).contains(button)
-      ) {
-        return;
-      }
-
-
-      toggleFilter(
-        "day",
-        button.dataset.value
-      );
-    }
-  );
-
-
-  /*
-   * BUSCA
-   */
-  el(
-    "subjectSearch"
-  ).addEventListener(
-    "input",
-    event => {
-      state.filters.query =
-        normalizeText(
-          event.target.value
-        );
-
-
-      renderFilteredDashboard();
-    }
-  );
-
-
-  /*
-   * LIMPAR FILTROS
-   */
-  el(
-    "clearFilters"
-  ).addEventListener(
-    "click",
-    () => {
-      state.filters
-        .themes
-        .clear();
-
-
-      state.filters
-        .days
-        .clear();
-
-
-      state.filters.query =
-        "";
-
-
-      el(
-        "subjectSearch"
-      ).value =
-        "";
-
-
-      renderFilters();
-
-      renderFilteredDashboard();
-    }
-  );
-
-
-  /*
-   * PLANO DE HOJE
-   */
-  el(
-    "focusTodayButton"
-  ).addEventListener(
-    "click",
-    () => {
-      state.filters
-        .days
-        .clear();
-
-
-      state.filters
-        .days
-        .add(
-          getDayKey()
-        );
-
-
-      renderFilters();
-
-      renderFilteredDashboard();
-
-
-      el(
-        "disciplinesSection"
-      ).scrollIntoView(
-        {
-          behavior:
-            "smooth",
-
-          block:
-            "start"
-        }
-      );
-    }
-  );
-
-
-  /*
-   * ROTINA
-   */
-  el(
-    "settingsButton"
-  ).addEventListener(
-    "click",
-    openScheduleDialog
-  );
-
-
-  el(
-    "editScheduleButton"
-  ).addEventListener(
-    "click",
-    openScheduleDialog
-  );
-
-
-  el(
-    "saveScheduleButton"
-  ).addEventListener(
-    "click",
-    saveScheduleFromDialog
-  );
-
-
-  /*
-   * DESFAZER
-   */
-  el(
-    "toastUndo"
-  ).addEventListener(
-    "click",
-    undoLastAction
-  );
-
-
-  /*
-   * ZERAR
-   */
-  el(
-    "resetProgress"
-  ).addEventListener(
-    "click",
-    resetProgress
-  );
-
-
-  /*
-   * PLANILHA
-   */
-  el(
-    "xlsxInput"
-  ).addEventListener(
-    "change",
-    importSpreadsheet
-  );
-}
-
-
-/* =========================================================
-   EDITAR ROTINA
-========================================================= */
-
-function openScheduleDialog() {
-  renderScheduleEditor();
-
-
-  el(
-    "scheduleDialog"
-  ).showModal();
-}
-
-
-function renderScheduleEditor() {
-  const workdays =
-    DAY_KEYS.slice(
-      0,
-      5
-    );
-
-
-  el(
-    "scheduleEditor"
-  ).innerHTML =
-    workdays
-      .map(
-        day => `
-          <section
-            class="schedule-editor__day"
-          >
-
-            <h3>
-              ${DAY_LABELS[day]}
-            </h3>
-
-
-            ${
-              state.subjects
-                .map(
-                  subject => `
-                    <label
-                      class="schedule-option"
-                    >
-
-                      <input
-                        type="checkbox"
-
-                        name="schedule-${day}"
-
-                        value="${subject.id}"
-
-                        ${
-                          (
-                            state.schedule[
-                              day
-                            ] ||
-                            []
-                          ).includes(
-                            subject.id
-                          )
-                            ? "checked"
-                            : ""
-                        }
-                      />
-
-
-                      <span>
-                        ${escapeHtml(
-                          subject.name
-                        )}
-                      </span>
-
-                    </label>
-                  `
-                )
-                .join("")
-            }
-
-          </section>
-        `
-      )
-      .join("");
-}
-
-
-function saveScheduleFromDialog(
-  event
-) {
-  event.preventDefault();
-
-
-  const next = {};
-
-
-  DAY_KEYS
-    .slice(
-      0,
-      5
-    )
-    .forEach(
-      day => {
-        next[day] =
-          [
-            ...document
-              .querySelectorAll(
-                `input[name="schedule-${day}"]:checked`
-              )
-          ].map(
-            input =>
-              input.value
-          );
-      }
-    );
-
-
-  state.schedule =
-    next;
-
-
-  saveJson(
-    STORAGE.schedule,
-    state.schedule
-  );
-
-
-  el(
-    "scheduleDialog"
-  ).close();
-
-
-  renderFilters();
-
-  renderAll();
-
-
-  showToast(
-    "Rotina semanal atualizada."
-  );
-}
-
-
-/* =========================================================
-   IMPORTAR PLANILHA
-========================================================= */
-
-async function importSpreadsheet(
-  event
-) {
-  const file =
-    event.target
-      .files?.[0];
-
-
-  if (!file) {
-    return;
-  }
-
-
-  if (
-    typeof XLSX ===
-    "undefined"
-  ) {
-    showToast(
-      "Não foi possível carregar o leitor de planilhas."
-    );
-
-    return;
-  }
-
-
-  try {
-    const buffer =
-      await file.arrayBuffer();
-
-
-    const workbook =
-      XLSX.read(
-        buffer,
-        {
-          type: "array"
-        }
-      );
-
-
-    const sheet =
-      workbook.Sheets[
-        workbook.SheetNames[0]
-      ];
-
-
-    const rows =
-      XLSX.utils
-        .sheet_to_json(
-          sheet,
-          {
-            defval: ""
-          }
-        );
-
-
-    const parsed =
-      rows
-        .map(
-          row => {
-            const name =
-              String(
-                row[
-                  "Disciplina"
-                ] ??
-                row[
-                  "disciplina"
-                ] ??
-                ""
-              ).trim();
-
-
-            const theme =
-              String(
-                row[
-                  "Tema"
-                ] ??
-                row[
-                  "tema"
-                ] ??
-                ""
-              ).trim();
-
-
-            const total =
-              Number(
-                row[
-                  "Aulas totais"
-                ] ??
-                row[
-                  "Aulas Totais"
-                ] ??
-                row[
-                  "aulas totais"
-                ] ??
-                0
-              );
-
-
-            return {
-              id:
-                slugify(name),
-
-              name,
-
-              theme,
-
-              total:
-                Math.max(
-                  0,
-                  Math.floor(
-                    total
-                  )
-                )
-            };
-          }
-        )
-
-        .filter(
-          subject =>
-            subject.name &&
-            subject.theme &&
-            subject.total >
-              0
-        );
-
-
-    if (
-      !parsed.length
-    ) {
-      throw new Error(
-        "Formato inválido"
-      );
-    }
-
-
-    state.subjects =
-      parsed;
-
-
-    state.openLessons
-      .clear();
-
-
-    saveJson(
-      STORAGE.subjects,
-      state.subjects
-    );
-
-
-    normalizeProgress();
-
-    sanitizeSchedule();
-
-
-    state.filters
-      .themes
-      .clear();
-
-
-    state.filters
-      .days
-      .clear();
-
-
-    state.filters.query =
-      "";
-
-
-    el(
-      "subjectSearch"
-    ).value =
-      "";
-
-
-    renderFilters();
-
-    renderAll();
-
-
-    showToast(
-      `${parsed.length} disciplinas importadas da planilha.`
-    );
-
-  } catch (error) {
-    console.error(error);
-
-
-    showToast(
-      "Planilha inválida. Use as colunas Disciplina, Tema e Aulas totais."
-    );
-
-  } finally {
-    event.target.value =
-      "";
-  }
-}
-
-
-function sanitizeSchedule() {
-  const ids =
-    new Set(
-      state.subjects.map(
-        subject =>
-          subject.id
-      )
-    );
-
-
-  const next = {};
-
-
-  DAY_KEYS
-    .slice(
-      0,
-      5
-    )
-    .forEach(
-      day => {
-        next[day] =
-          (
-            state.schedule[
-              day
-            ] ||
-            []
-          ).filter(
-            id =>
-              ids.has(id)
-          );
-      }
-    );
-
-
-  state.schedule =
-    next;
-
-
-  saveJson(
-    STORAGE.schedule,
-    state.schedule
-  );
 }
 
 
@@ -3435,38 +3682,34 @@ function sanitizeSchedule() {
 ========================================================= */
 
 function resetProgress() {
+
   const confirmed =
     window.confirm(
-      "Zerar todo o progresso e o histórico de ritmo? Essa ação não pode ser desfeita."
+
+      "Zerar todo o progresso marcado? Essa ação não pode ser desfeita."
+
     );
 
 
-  if (!confirmed) {
+  if (
+    !confirmed
+  ) {
+
     return;
+
   }
 
 
-  state.progress = {};
+  state.progress =
+    {};
 
-  state.events = [];
 
   state.lastAction =
     null;
 
-  state.openLessons
+
+  state.openSubjects
     .clear();
-
-
-  saveJson(
-    STORAGE.progress,
-    state.progress
-  );
-
-
-  saveJson(
-    STORAGE.events,
-    state.events
-  );
 
 
   normalizeProgress();
@@ -3475,13 +3718,111 @@ function resetProgress() {
 
 
   showToast(
-    "Progresso zerado."
+    "Progresso zerado.",
+    false
   );
+
 }
 
 
 /* =========================================================
-   INICIAR
+   RENDER COMPLETO
 ========================================================= */
+
+function renderAll() {
+
+  buildThemeColors();
+
+  renderToday();
+
+  renderSummary();
+
+  renderThemes();
+
+  renderRemainingChart();
+
+  renderSubjects();
+
+}
+
+
+/* =========================================================
+   EVENTOS FIXOS
+========================================================= */
+
+function bindEvents() {
+
+  $(
+    "xlsxInput"
+  ).addEventListener(
+
+    "change",
+
+    importSpreadsheet
+
+  );
+
+
+  $(
+    "toastUndo"
+  ).addEventListener(
+
+    "click",
+
+    undoLastAction
+
+  );
+
+
+  $(
+    "resetProgress"
+  ).addEventListener(
+
+    "click",
+
+    resetProgress
+
+  );
+
+}
+
+
+/* =========================================================
+   INICIALIZAR
+========================================================= */
+
+function init() {
+
+  $(
+    "currentDate"
+  ).textContent =
+    formatDate();
+
+
+  normalizeProgress();
+
+  buildThemeColors();
+
+  bindEvents();
+
+  renderAll();
+
+
+  $(
+    "dataStatus"
+  ).textContent =
+    "Dados salvos neste navegador.";
+
+
+  /*
+   * Quando estiver no GitHub Pages,
+   * procura Estudos.xlsx automaticamente
+   * na mesma pasta.
+   */
+
+  tryLoadRootSpreadsheet();
+
+}
+
 
 init();
