@@ -2,212 +2,392 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#f6f4fb" />
-  <meta name="description" content="Dashboard de estudos com progresso, rotina semanal e controle de aulas assistidas." />
-  <title>Dashboard de Estudos</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <meta
+    name="theme-color"
+    content="#f5f4f8"
+  />
+
+  <title>Painel de Estudos</title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  />
 </head>
+
 <body>
-  <div class="ambient ambient--one" aria-hidden="true"></div>
-  <div class="ambient ambient--two" aria-hidden="true"></div>
 
   <main class="app-shell">
+
+    <!-- =========================================
+         CABEÇALHO
+    ========================================== -->
+
     <header class="topbar">
+
       <div>
-        <p class="eyebrow">PAINEL DE ESTUDOS</p>
-        <h1>Seu progresso, sem ruído.</h1>
-        <p class="topbar__date" id="currentDate"></p>
+
+        <p class="eyebrow">
+          PAINEL DE ESTUDOS
+        </p>
+
+        <h1>
+          Meu progresso
+        </h1>
+
+        <p
+          class="topbar__date"
+          id="currentDate"
+        ></p>
+
       </div>
+
+
       <div class="topbar__actions">
-        <label class="button button--ghost" for="xlsxInput" title="Importar uma nova planilha com as colunas Disciplina, Tema e Aulas totais">
-          <span aria-hidden="true">↥</span>
-          Importar planilha
+
+        <label
+          class="ghost-button"
+          for="xlsxInput"
+        >
+          Atualizar planilha
         </label>
-        <input id="xlsxInput" type="file" accept=".xlsx,.xls" hidden />
-        <button class="button button--icon" id="settingsButton" type="button" aria-label="Editar rotina semanal" title="Editar rotina semanal">⚙</button>
+
+        <input
+          id="xlsxInput"
+          class="sr-only"
+          type="file"
+          accept=".xlsx,.xls"
+        />
+
       </div>
+
     </header>
 
-    <section class="today-card surface surface--dark" aria-labelledby="todayTitle">
-      <div class="today-card__copy">
-        <div class="today-card__badge" id="todayBadge">HOJE</div>
-        <h2 id="todayTitle">O que estudar hoje</h2>
-        <p id="todaySubtitle">Carregando sua rotina...</p>
+
+    <!-- =========================================
+         HOJE
+    ========================================== -->
+
+    <section
+      class="today-card"
+      aria-labelledby="todayTitle"
+    >
+
+      <div class="today-card__content">
+
+        <p
+          class="eyebrow eyebrow--light"
+          id="todayLabel"
+        >
+          HOJE
+        </p>
+
+        <h2 id="todayTitle">
+          Carregando plano de hoje…
+        </h2>
+
+        <p id="todayMeta">
+          Preparando seu próximo passo.
+        </p>
+
       </div>
-      <div class="today-card__subjects" id="todaySubjects" aria-live="polite"></div>
-      <button class="button button--light" id="focusTodayButton" type="button">Ver plano de hoje</button>
+
+
+      <div
+        class="today-card__action"
+        id="todayAction"
+      ></div>
+
     </section>
 
-    <section class="metrics-grid" aria-label="Resumo do progresso">
-      <article class="metric-card surface">
-        <div class="metric-card__label">Concluído</div>
-        <div class="metric-card__value" id="metricPercent">0%</div>
-        <div class="mini-progress" aria-hidden="true"><span id="metricPercentBar"></span></div>
-        <p class="metric-card__meta" id="metricPercentMeta">0 de 0 aulas</p>
+
+    <!-- =========================================
+         RESUMO
+    ========================================== -->
+
+    <section
+      class="summary-grid"
+      aria-label="Resumo do progresso"
+    >
+
+      <article
+        class="
+          summary-card
+          summary-card--progress
+        "
+      >
+
+        <div class="summary-card__header">
+
+          <span>
+            Progresso geral
+          </span>
+
+          <strong id="overallPercent">
+            0%
+          </strong>
+
+        </div>
+
+
+        <div
+          class="overall-track"
+          aria-hidden="true"
+        >
+          <span id="overallProgressBar"></span>
+        </div>
+
+
+        <p id="overallDetail">
+          0 de 0 aulas concluídas
+        </p>
+
       </article>
 
-      <article class="metric-card surface">
-        <div class="metric-card__label">Aulas assistidas</div>
-        <div class="metric-card__value" id="metricDone">0</div>
-        <p class="metric-card__meta">Marcadas no dashboard</p>
+
+      <article class="summary-card">
+
+        <span class="summary-card__label">
+          Concluídas
+        </span>
+
+        <strong
+          class="summary-card__value"
+          id="completedTotal"
+        >
+          0
+        </strong>
+
+        <span class="summary-card__support">
+          aulas assistidas
+        </span>
+
       </article>
 
-      <article class="metric-card surface">
-        <div class="metric-card__label">Restantes</div>
-        <div class="metric-card__value" id="metricRemaining">0</div>
-        <p class="metric-card__meta" id="metricRemainingMeta">Você está no começo</p>
+
+      <article class="summary-card">
+
+        <span class="summary-card__label">
+          Restantes
+        </span>
+
+        <strong
+          class="summary-card__value"
+          id="remainingTotal"
+        >
+          0
+        </strong>
+
+        <span class="summary-card__support">
+          aulas pela frente
+        </span>
+
       </article>
 
-      <article class="metric-card surface">
-        <div class="metric-card__label">Últimos 7 dias</div>
-        <div class="metric-card__value" id="metricWeek">0</div>
-        <p class="metric-card__meta">aulas concluídas</p>
-      </article>
     </section>
 
-    <section class="filter-panel surface" aria-labelledby="filtersTitle">
-      <div class="section-heading section-heading--compact">
-        <div>
-          <p class="eyebrow">FILTROS</p>
-          <h2 id="filtersTitle">Recorte seu plano</h2>
-        </div>
-        <button class="text-button" type="button" id="clearFilters">Limpar filtros</button>
-      </div>
 
-      <div class="filter-row">
-        <span class="filter-label">Tema</span>
-        <div class="chip-group" id="themeFilters" aria-label="Filtrar por tema"></div>
-      </div>
+    <!-- =========================================
+         TEMAS
+    ========================================== -->
 
-      <div class="filter-row">
-        <span class="filter-label">Dia</span>
-        <div class="chip-group chip-group--scroll" id="dayFilters" aria-label="Filtrar por dia"></div>
-      </div>
+    <section
+      class="section-block"
+      aria-labelledby="themesTitle"
+    >
 
-      <div class="search-wrap">
-        <span aria-hidden="true">⌕</span>
-        <input id="subjectSearch" type="search" placeholder="Buscar disciplina..." autocomplete="off" aria-label="Buscar disciplina" />
-      </div>
-    </section>
-
-    <section class="charts-layout" aria-label="Gráficos de progresso">
-      <article class="chart-card surface chart-card--overall">
-        <div class="section-heading section-heading--compact">
-          <div>
-            <p class="eyebrow">VISÃO GERAL</p>
-            <h2>Progresso total</h2>
-          </div>
-        </div>
-        <div class="donut-wrap">
-          <canvas id="overallChart" role="img" aria-label="Gráfico de rosca mostrando percentual de aulas concluídas e restantes"></canvas>
-          <div class="donut-center" aria-hidden="true">
-            <strong id="donutPercent">0%</strong>
-            <span>concluído</span>
-          </div>
-        </div>
-      </article>
-
-      <article class="chart-card surface chart-card--wide">
-        <div class="section-heading section-heading--compact">
-          <div>
-            <p class="eyebrow">POR TEMA</p>
-            <h2>Avanço em cada área</h2>
-          </div>
-        </div>
-        <div class="chart-container chart-container--medium">
-          <canvas id="themeChart" role="img" aria-label="Gráfico de barras mostrando percentual concluído em cada tema"></canvas>
-        </div>
-      </article>
-
-      <article class="chart-card surface chart-card--wide">
-        <div class="section-heading section-heading--compact">
-          <div>
-            <p class="eyebrow">POR DISCIPLINA</p>
-            <h2>Onde você está avançando</h2>
-          </div>
-          <span class="section-note">ordem: menor progresso primeiro</span>
-        </div>
-        <div class="chart-container chart-container--tall">
-          <canvas id="disciplineChart" role="img" aria-label="Gráfico horizontal mostrando percentual concluído por disciplina"></canvas>
-        </div>
-      </article>
-
-      <article class="chart-card surface chart-card--wide">
-        <div class="section-heading section-heading--compact">
-          <div>
-            <p class="eyebrow">RITMO</p>
-            <h2>Últimos 14 dias</h2>
-          </div>
-        </div>
-        <div class="chart-container chart-container--medium">
-          <canvas id="paceChart" role="img" aria-label="Gráfico de linha mostrando aulas concluídas nos últimos 14 dias"></canvas>
-        </div>
-      </article>
-    </section>
-
-    <section class="section-block" id="disciplinesSection" aria-labelledby="disciplinesTitle">
       <div class="section-heading">
+
         <div>
-          <p class="eyebrow">DISCIPLINAS</p>
-          <h2 id="disciplinesTitle">Marque o que você assistiu</h2>
-          <p class="section-description">Use +1 para avançar rápido ou abra “Ver aulas” para marcar uma aula específica.</p>
+
+          <p class="eyebrow">
+            VISÃO POR ÁREA
+          </p>
+
+          <h2 id="themesTitle">
+            Progresso por tema
+          </h2>
+
         </div>
-        <div class="result-count" id="resultCount">0 disciplinas</div>
+
+
+        <p class="section-heading__note">
+          Criado automaticamente a partir da planilha.
+        </p>
+
       </div>
-      <div class="discipline-grid" id="disciplineGrid"></div>
-      <div class="empty-state surface" id="emptyState" hidden>
-        <strong>Nenhuma disciplina encontrada.</strong>
-        <span>Tente remover um filtro ou alterar a busca.</span>
-      </div>
+
+
+      <div
+        class="theme-grid"
+        id="themeGrid"
+      ></div>
+
     </section>
 
-    <section class="section-block" id="scheduleSection" aria-labelledby="scheduleTitle">
+
+    <!-- =========================================
+         AULAS RESTANTES
+    ========================================== -->
+
+    <section
+      class="section-block"
+      aria-labelledby="workloadTitle"
+    >
+
       <div class="section-heading">
+
         <div>
-          <p class="eyebrow">ROTINA SEMANAL</p>
-          <h2 id="scheduleTitle">Uma semana que se adapta ao seu progresso</h2>
-          <p class="section-description">Segunda a sexta usam sua rotina fixa. No fim de semana, o painel sugere reforço nas disciplinas com menor percentual concluído.</p>
+
+          <p class="eyebrow">
+            PRÓXIMO FOCO
+          </p>
+
+          <h2 id="workloadTitle">
+            Aulas restantes por disciplina
+          </h2>
+
         </div>
-        <button class="button button--ghost" id="editScheduleButton" type="button">Editar rotina</button>
+
+
+        <p class="section-heading__note">
+          As maiores barras indicam onde ainda há mais conteúdo.
+        </p>
+
       </div>
-      <div class="week-grid" id="weekGrid"></div>
+
+
+      <div class="chart-panel">
+
+        <div
+          class="chart-container"
+          id="remainingChartContainer"
+        >
+
+          <canvas
+            id="remainingChart"
+            role="img"
+            aria-label="Gráfico de aulas restantes por disciplina"
+          ></canvas>
+
+        </div>
+
+      </div>
+
     </section>
 
-    <footer class="footer-note">
-      <span>Progresso salvo neste navegador.</span>
-      <button class="text-button text-button--danger" type="button" id="resetProgress">Zerar progresso</button>
+
+    <!-- =========================================
+         DISCIPLINAS
+    ========================================== -->
+
+    <section
+      class="section-block"
+      aria-labelledby="subjectsTitle"
+    >
+
+      <div
+        class="
+          section-heading
+          section-heading--subjects
+        "
+      >
+
+        <div>
+
+          <p class="eyebrow">
+            CONTROLE
+          </p>
+
+          <h2 id="subjectsTitle">
+            Disciplinas
+          </h2>
+
+        </div>
+
+
+        <span
+          class="subject-count"
+          id="subjectCount"
+        ></span>
+
+      </div>
+
+
+      <div
+        class="subject-list"
+        id="subjectList"
+      ></div>
+
+    </section>
+
+
+    <!-- =========================================
+         RODAPÉ
+    ========================================== -->
+
+    <footer class="footer">
+
+      <span id="dataStatus">
+        Dados carregados.
+      </span>
+
+
+      <button
+        class="text-button"
+        id="resetProgress"
+        type="button"
+      >
+        Zerar progresso
+      </button>
+
     </footer>
+
   </main>
 
-  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true">
+
+  <!-- =========================================
+       TOAST
+  ========================================== -->
+
+  <div
+    class="toast"
+    id="toast"
+    role="status"
+    aria-live="polite"
+  >
+
     <span id="toastMessage"></span>
-    <button id="toastUndo" type="button">Desfazer</button>
+
+    <button
+      type="button"
+      id="toastUndo"
+    >
+      Desfazer
+    </button>
+
   </div>
 
-  <dialog class="schedule-dialog" id="scheduleDialog" aria-labelledby="scheduleDialogTitle">
-    <form method="dialog" class="dialog-card" id="scheduleForm">
-      <div class="dialog-header">
-        <div>
-          <p class="eyebrow">PERSONALIZAR</p>
-          <h2 id="scheduleDialogTitle">Editar rotina semanal</h2>
-          <p>Selecione as disciplinas de segunda a sexta. Sábado e domingo são definidos automaticamente pelo seu progresso.</p>
-        </div>
-        <button class="dialog-close" value="cancel" aria-label="Fechar">×</button>
-      </div>
-      <div class="schedule-editor" id="scheduleEditor"></div>
-      <div class="dialog-actions">
-        <button class="button button--ghost" value="cancel">Cancelar</button>
-        <button class="button button--primary" value="default" id="saveScheduleButton">Salvar rotina</button>
-      </div>
-    </form>
-  </dialog>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- =========================================
+       BIBLIOTECAS
+  ========================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"
+  ></script>
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
+  ></script>
+
   <script src="app.js"></script>
+
 </body>
 </html>
