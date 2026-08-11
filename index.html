@@ -1,71 +1,68 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
 
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0"
-  />
+  >
 
   <meta
     name="theme-color"
-    content="#f5f4f8"
-  />
+    content="#161719"
+  >
 
   <title>Painel de Estudos</title>
 
   <link
     rel="stylesheet"
     href="styles.css"
-  />
+  >
 </head>
 
 <body>
 
-  <main class="app-shell">
+  <main class="app">
 
     <!-- =========================================
          CABEÇALHO
     ========================================== -->
 
-    <header class="topbar">
+    <header class="header">
 
       <div>
 
-        <p class="eyebrow">
-          PAINEL DE ESTUDOS
-        </p>
+        <span class="kicker">
+          ESTUDOS
+        </span>
 
         <h1>
           Meu progresso
         </h1>
 
         <p
-          class="topbar__date"
+          class="date"
           id="currentDate"
         ></p>
 
       </div>
 
 
-      <div class="topbar__actions">
+      <label
+        class="import-button"
+        for="xlsxInput"
+      >
+        Atualizar planilha
+      </label>
 
-        <label
-          class="ghost-button"
-          for="xlsxInput"
-        >
-          Atualizar planilha
-        </label>
-
-        <input
-          id="xlsxInput"
-          class="sr-only"
-          type="file"
-          accept=".xlsx,.xls"
-        />
-
-      </div>
+      <input
+        type="file"
+        id="xlsxInput"
+        accept=".xlsx,.xls"
+        hidden
+      >
 
     </header>
 
@@ -74,33 +71,27 @@
          HOJE
     ========================================== -->
 
-    <section
-      class="today-card"
-      aria-labelledby="todayTitle"
-    >
+    <section class="today">
 
-      <div class="today-card__content">
+      <div class="today__content">
 
-        <p
-          class="eyebrow eyebrow--light"
-          id="todayLabel"
-        >
+        <span class="today__label">
           HOJE
-        </p>
+        </span>
 
         <h2 id="todayTitle">
-          Carregando plano de hoje…
+          Carregando…
         </h2>
 
-        <p id="todayMeta">
-          Preparando seu próximo passo.
+        <p id="todayDescription">
+          Preparando sua rotina.
         </p>
 
       </div>
 
 
       <div
-        class="today-card__action"
+        class="today__action"
         id="todayAction"
       ></div>
 
@@ -111,19 +102,11 @@
          RESUMO
     ========================================== -->
 
-    <section
-      class="summary-grid"
-      aria-label="Resumo do progresso"
-    >
+    <section class="summary">
 
-      <article
-        class="
-          summary-card
-          summary-card--progress
-        "
-      >
+      <article class="summary__progress">
 
-        <div class="summary-card__header">
+        <div class="summary__progress-top">
 
           <span>
             Progresso geral
@@ -135,58 +118,43 @@
 
         </div>
 
+        <div class="global-progress">
 
-        <div
-          class="overall-track"
-          aria-hidden="true"
-        >
-          <span id="overallProgressBar"></span>
+          <span
+            id="globalProgressBar"
+          ></span>
+
         </div>
 
-
-        <p id="overallDetail">
-          0 de 0 aulas concluídas
-        </p>
+        <small id="overallDescription">
+          0 de 0 aulas
+        </small>
 
       </article>
 
 
-      <article class="summary-card">
+      <article class="summary__number">
 
-        <span class="summary-card__label">
+        <span>
           Concluídas
         </span>
 
-        <strong
-          class="summary-card__value"
-          id="completedTotal"
-        >
+        <strong id="completedTotal">
           0
         </strong>
-
-        <span class="summary-card__support">
-          aulas assistidas
-        </span>
 
       </article>
 
 
-      <article class="summary-card">
+      <article class="summary__number">
 
-        <span class="summary-card__label">
+        <span>
           Restantes
         </span>
 
-        <strong
-          class="summary-card__value"
-          id="remainingTotal"
-        >
+        <strong id="remainingTotal">
           0
         </strong>
-
-        <span class="summary-card__support">
-          aulas pela frente
-        </span>
 
       </article>
 
@@ -197,31 +165,27 @@
          TEMAS
     ========================================== -->
 
-    <section
-      class="section-block"
-      aria-labelledby="themesTitle"
-    >
+    <section class="section">
 
-      <div class="section-heading">
+      <header class="section__header">
 
         <div>
 
-          <p class="eyebrow">
-            VISÃO POR ÁREA
-          </p>
+          <span class="kicker">
+            ÁREAS
+          </span>
 
-          <h2 id="themesTitle">
-            Progresso por tema
+          <h2>
+            Temas
           </h2>
 
         </div>
 
-
-        <p class="section-heading__note">
-          Criado automaticamente a partir da planilha.
+        <p>
+          Visão geral do avanço em cada área.
         </p>
 
-      </div>
+      </header>
 
 
       <div
@@ -233,96 +197,36 @@
 
 
     <!-- =========================================
-         AULAS RESTANTES
-    ========================================== -->
-
-    <section
-      class="section-block"
-      aria-labelledby="workloadTitle"
-    >
-
-      <div class="section-heading">
-
-        <div>
-
-          <p class="eyebrow">
-            PRÓXIMO FOCO
-          </p>
-
-          <h2 id="workloadTitle">
-            Aulas restantes por disciplina
-          </h2>
-
-        </div>
-
-
-        <p class="section-heading__note">
-          As maiores barras indicam onde ainda há mais conteúdo.
-        </p>
-
-      </div>
-
-
-      <div class="chart-panel">
-
-        <div
-          class="chart-container"
-          id="remainingChartContainer"
-        >
-
-          <canvas
-            id="remainingChart"
-            role="img"
-            aria-label="Gráfico de aulas restantes por disciplina"
-          ></canvas>
-
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =========================================
          DISCIPLINAS
     ========================================== -->
 
-    <section
-      class="section-block"
-      aria-labelledby="subjectsTitle"
-    >
+    <section class="section">
 
-      <div
-        class="
-          section-heading
-          section-heading--subjects
-        "
-      >
+      <header class="section__header">
 
         <div>
 
-          <p class="eyebrow">
-            CONTROLE
-          </p>
+          <span class="kicker">
+            DETALHAMENTO
+          </span>
 
-          <h2 id="subjectsTitle">
+          <h2>
             Disciplinas
           </h2>
 
         </div>
 
-
         <span
-          class="subject-count"
+          class="counter"
           id="subjectCount"
         ></span>
 
-      </div>
+      </header>
 
 
       <div
-        class="subject-list"
-        id="subjectList"
+        class="subject-grid"
+        id="subjectGrid"
       ></div>
 
     </section>
@@ -335,14 +239,12 @@
     <footer class="footer">
 
       <span id="dataStatus">
-        Dados carregados.
+        Dados salvos neste navegador.
       </span>
 
-
       <button
-        class="text-button"
-        id="resetProgress"
         type="button"
+        id="resetProgress"
       >
         Zerar progresso
       </button>
@@ -359,7 +261,6 @@
   <div
     class="toast"
     id="toast"
-    role="status"
     aria-live="polite"
   >
 
@@ -390,4 +291,5 @@
   <script src="app.js"></script>
 
 </body>
+
 </html>
