@@ -2,181 +2,91 @@
 
 
 /* =========================================================
-   DADOS INICIAIS
-
-   Estes dados servem apenas como fallback.
-
-   Quando estiver no GitHub Pages, o dashboard tentará
-   abrir automaticamente:
-
-   ./Estudos.xlsx
-
-   Se a planilha existir na mesma pasta, ela passa a ser
-   a fonte dos dados.
+   DADOS PADRÃO
 ========================================================= */
 
 const DEFAULT_SUBJECTS = [
 
   {
-    name:
-      "Arte Cinematográfica",
-
-    theme:
-      "Cinema",
-
-    total:
-      33,
-
-    days:
-      []
+    name: "Arte Cinematográfica",
+    theme: "Cinema",
+    total: 33,
+    days: []
   },
 
   {
-    name:
-      "Aspectos Cinematográficos",
-
-    theme:
-      "Cinema",
-
-    total:
-      17,
-
-    days:
-      []
+    name: "Aspectos Cinematográficos",
+    theme: "Cinema",
+    total: 17,
+    days: []
   },
 
   {
-    name:
-      "História do Cinema",
-
-    theme:
-      "Cinema",
-
-    total:
-      27,
-
-    days:
-      []
+    name: "História do Cinema",
+    theme: "Cinema",
+    total: 27,
+    days: []
   },
 
   {
-    name:
-      "Crítica Cinematográfica",
-
-    theme:
-      "Cinema",
-
-    total:
-      18,
-
-    days:
-      []
+    name: "Crítica Cinematográfica",
+    theme: "Cinema",
+    total: 18,
+    days: []
   },
 
   {
-    name:
-      "Teoria Historiográfica",
-
-    theme:
-      "História",
-
-    total:
-      33,
-
-    days:
-      []
+    name: "Teoria Historiográfica",
+    theme: "História",
+    total: 33,
+    days: []
   },
 
   {
-    name:
-      "Teoria Historiográfica Brasileira",
-
-    theme:
-      "História",
-
-    total:
-      29,
-
-    days:
-      []
+    name: "Teoria Historiográfica Brasileira",
+    theme: "História",
+    total: 29,
+    days: []
   },
 
   {
-    name:
-      "Pré-História",
-
-    theme:
-      "História",
-
-    total:
-      17,
-
-    days:
-      []
+    name: "Pré-História",
+    theme: "História",
+    total: 17,
+    days: []
   },
 
   {
-    name:
-      "Filosofia na Antiguidade Europeia",
-
-    theme:
-      "Filosofia",
-
-    total:
-      35,
-
-    days:
-      []
+    name: "Filosofia na Antiguidade Europeia",
+    theme: "Filosofia",
+    total: 35,
+    days: []
   },
 
   {
-    name:
-      "Filosofia na Antiguidade Asiática",
-
-    theme:
-      "Filosofia",
-
-    total:
-      15,
-
-    days:
-      []
+    name: "Filosofia na Antiguidade Asiática",
+    theme: "Filosofia",
+    total: 15,
+    days: []
   },
 
   {
-    name:
-      "Filosofia Africana",
-
-    theme:
-      "Filosofia",
-
-    total:
-      48,
-
-    days:
-      []
+    name: "Filosofia Africana",
+    theme: "Filosofia",
+    total: 48,
+    days: []
   }
 
 ].map(
   subject => ({
     ...subject,
-
-    id:
-      slugify(
-        subject.name
-      )
+    id: slugify(subject.name)
   })
 );
 
 
 /* =========================================================
-   PLANO SEMANAL PADRÃO
-
-   Usado apenas quando a planilha NÃO possui
-   uma coluna Dia ou Dias.
-
-   SÁBADO:
-   Teoria Historiográfica Brasileira
+   ROTINA PADRÃO
 ========================================================= */
 
 const FALLBACK_WEEK_PLAN = {
@@ -215,7 +125,7 @@ const FALLBACK_WEEK_PLAN = {
 
 
 /* =========================================================
-   LOCAL STORAGE
+   STORAGE
 ========================================================= */
 
 const STORAGE = {
@@ -250,14 +160,11 @@ const state = {
   openSubjects:
     new Set(),
 
-  themeColors:
-    new Map(),
-
   themeCharts:
     [],
 
-  remainingChart:
-    null,
+  subjectCharts:
+    [],
 
   lastAction:
     null,
@@ -269,23 +176,17 @@ const state = {
 
 
 const $ = id =>
-  document.getElementById(
-    id
-  );
+  document.getElementById(id);
 
 
 /* =========================================================
-   UTILITÁRIOS
+   STORAGE
 ========================================================= */
 
-function clone(
-  value
-) {
+function clone(value) {
 
   return JSON.parse(
-    JSON.stringify(
-      value
-    )
+    JSON.stringify(value)
   );
 
 }
@@ -299,34 +200,16 @@ function loadJSON(
   try {
 
     const raw =
-      localStorage.getItem(
-        key
-      );
+      localStorage.getItem(key);
 
 
     return raw
+      ? JSON.parse(raw)
+      : clone(fallback);
 
-      ? JSON.parse(
-          raw
-        )
+  } catch (error) {
 
-      : clone(
-          fallback
-        );
-
-  }
-
-  catch (error) {
-
-    console.warn(
-      `Falha ao carregar ${key}.`,
-      error
-    );
-
-
-    return clone(
-      fallback
-    );
+    return clone(fallback);
 
   }
 
@@ -341,21 +224,14 @@ function saveJSON(
   try {
 
     localStorage.setItem(
-
       key,
-
-      JSON.stringify(
-        value
-      )
-
+      JSON.stringify(value)
     );
 
-  }
-
-  catch (error) {
+  } catch (error) {
 
     console.warn(
-      `Falha ao salvar ${key}.`,
+      "Não foi possível salvar.",
       error
     );
 
@@ -364,17 +240,17 @@ function saveJSON(
 }
 
 
-function normalizeText(
-  value
-) {
+/* =========================================================
+   TEXTO
+========================================================= */
+
+function normalizeText(value) {
 
   return String(
     value ?? ""
   )
 
-    .normalize(
-      "NFD"
-    )
+    .normalize("NFD")
 
     .replace(
       /[\u0300-\u036f]/g,
@@ -390,13 +266,9 @@ function normalizeText(
 }
 
 
-function slugify(
-  value
-) {
+function slugify(value) {
 
-  return normalizeText(
-    value
-  )
+  return normalizeText(value)
 
     .replace(
       /[^a-z0-9]+/g,
@@ -411,13 +283,9 @@ function slugify(
 }
 
 
-function escapeHTML(
-  value
-) {
+function escapeHTML(value) {
 
-  return String(
-    value
-  )
+  return String(value)
 
     .replaceAll(
       "&",
@@ -456,15 +324,9 @@ function getCompletedSet(
 ) {
 
   return new Set(
-
     state.progress[
       subjectId
-    ]
-
-    ||
-
-    []
-
+    ] || []
   );
 
 }
@@ -475,45 +337,10 @@ function completedCount(
 ) {
 
   return Math.min(
-
+    subject.total,
     getCompletedSet(
       subject.id
-    ).size,
-
-    subject.total
-
-  );
-
-}
-
-
-function percentage(
-  subject
-) {
-
-  if (
-    !subject.total
-  ) {
-
-    return 0;
-
-  }
-
-
-  return Math.round(
-
-    (
-      completedCount(
-        subject
-      )
-      /
-      subject.total
-    )
-
-    *
-
-    100
-
+    ).size
   );
 
 }
@@ -524,58 +351,51 @@ function remainingCount(
 ) {
 
   return Math.max(
-
     0,
+    subject.total -
+    completedCount(subject)
+  );
 
-    subject.total
-    -
-    completedCount(
-      subject
-    )
+}
 
+
+function percentage(
+  subject
+) {
+
+  if (!subject.total) {
+    return 0;
+  }
+
+
+  return Math.round(
+    (
+      completedCount(subject) /
+      subject.total
+    ) * 100
   );
 
 }
 
 
 function totals(
-  subjects =
-    state.subjects
+  subjects = state.subjects
 ) {
 
   const total =
     subjects.reduce(
-
-      (
-        sum,
-        subject
-      ) =>
-
-        sum
-        +
-        subject.total,
-
+      (sum, subject) =>
+        sum + subject.total,
       0
-
     );
 
 
   const completed =
     subjects.reduce(
-
-      (
-        sum,
-        subject
-      ) =>
-
-        sum
-        +
-        completedCount(
-          subject
-        ),
-
+      (sum, subject) =>
+        sum +
+        completedCount(subject),
       0
-
     );
 
 
@@ -593,24 +413,122 @@ function totals(
 
     percentage:
       total
-
         ? Math.round(
-
             (
-              completed
-              /
+              completed /
               total
-            )
-
-            *
-
-            100
-
+            ) * 100
           )
-
         : 0
 
   };
+
+}
+
+
+/* =========================================================
+   CORES PASTÉIS DINÂMICAS
+========================================================= */
+
+function hashString(value) {
+
+  let hash = 0;
+
+  const text =
+    normalizeText(value);
+
+
+  for (
+    let index = 0;
+    index < text.length;
+    index++
+  ) {
+
+    hash =
+      (
+        hash * 31 +
+        text.charCodeAt(index)
+      ) | 0;
+
+  }
+
+
+  return Math.abs(hash);
+
+}
+
+
+/*
+ * Cada tema recebe um hue estável.
+ *
+ * Se for criado "Sociologia" na planilha,
+ * por exemplo, receberá automaticamente
+ * uma nova cor.
+ */
+
+function getThemeHue(theme) {
+
+  return (
+    hashString(theme) %
+    360
+  );
+
+}
+
+
+function themeColor(theme) {
+
+  const hue =
+    getThemeHue(theme);
+
+
+  return `hsl(${hue} 48% 72%)`;
+
+}
+
+
+/*
+ * As disciplinas herdam a região cromática
+ * do tema, mas recebem pequenas variações.
+ *
+ * Assim disciplinas do mesmo tema parecem
+ * relacionadas sem ficarem idênticas.
+ */
+
+function subjectColor(subject) {
+
+  const baseHue =
+    getThemeHue(
+      subject.theme
+    );
+
+
+  const variation =
+    (
+      hashString(
+        subject.name
+      ) % 37
+    ) - 18;
+
+
+  const hue =
+    (
+      baseHue +
+      variation +
+      360
+    ) % 360;
+
+
+  const lightness =
+    69 +
+    (
+      hashString(
+        subject.name + "light"
+      ) % 7
+    );
+
+
+  return `hsl(${hue} 48% ${lightness}%)`;
 
 }
 
@@ -620,8 +538,7 @@ function totals(
 ========================================================= */
 
 function getDayKey(
-  date =
-    new Date()
+  date = new Date()
 ) {
 
   return [
@@ -641,9 +558,7 @@ function getDayKey(
 }
 
 
-function getDayLabel(
-  day
-) {
+function dayLabel(day) {
 
   return {
 
@@ -668,25 +583,19 @@ function getDayLabel(
     sabado:
       "Sábado"
 
-  }[
-    day
-  ] || day;
+  }[day] || day;
 
 }
 
 
 function formatDate(
-  date =
-    new Date()
+  date = new Date()
 ) {
 
   const text =
     new Intl.DateTimeFormat(
-
       "pt-BR",
-
       {
-
         weekday:
           "long",
 
@@ -698,26 +607,14 @@ function formatDate(
 
         year:
           "numeric"
-
       }
-
-    ).format(
-      date
-    );
+    ).format(date);
 
 
   return (
-
-    text
-      .charAt(0)
-      .toUpperCase()
-
-    +
-
-    text.slice(
-      1
-    )
-
+    text.charAt(0)
+      .toUpperCase() +
+    text.slice(1)
   );
 
 }
@@ -727,9 +624,7 @@ function formatDate(
    PRÓXIMA AULA
 ========================================================= */
 
-function nextLesson(
-  subject
-) {
+function nextLesson(subject) {
 
   const completed =
     getCompletedSet(
@@ -738,24 +633,15 @@ function nextLesson(
 
 
   for (
-
     let lesson = 1;
-
-    lesson <=
-      subject.total;
-
-    lesson += 1
-
+    lesson <= subject.total;
+    lesson++
   ) {
 
     if (
-      !completed.has(
-        lesson
-      )
+      !completed.has(lesson)
     ) {
-
       return lesson;
-
     }
 
   }
@@ -767,230 +653,73 @@ function nextLesson(
 
 
 /* =========================================================
-   CORES DINÂMICAS DOS TEMAS
+   DIA NA PLANILHA
 ========================================================= */
 
-function stringHash(
-  value
-) {
-
-  let hash =
-    0;
-
+function normalizeDay(value) {
 
   const text =
-    normalizeText(
-      value
-    );
+    normalizeText(value);
 
 
-  for (
-
-    let i = 0;
-
-    i < text.length;
-
-    i += 1
-
-  ) {
-
-    hash =
-      (
-        (
-          hash << 5
-        )
-        -
-        hash
-      )
-
-      +
-
-      text.charCodeAt(
-        i
-      );
+  if (
+    text.startsWith("seg")
+  ) return "segunda";
 
 
-    hash |=
-      0;
+  if (
+    text.startsWith("ter")
+  ) return "terca";
 
+
+  if (
+    text.startsWith("qua")
+  ) return "quarta";
+
+
+  if (
+    text.startsWith("qui")
+  ) return "quinta";
+
+
+  if (
+    text.startsWith("sex")
+  ) return "sexta";
+
+
+  if (
+    text.startsWith("sab")
+  ) return "sabado";
+
+
+  if (
+    text.startsWith("dom")
+  ) return "domingo";
+
+
+  return "";
+
+}
+
+
+function parseDays(value) {
+
+  if (!value) {
+    return [];
   }
 
 
-  return Math.abs(
-    hash
-  );
+  return String(value)
 
-}
-
-
-function hueDistance(
-  a,
-  b
-) {
-
-  const difference =
-    Math.abs(
-      a - b
-    )
-    %
-    360;
-
-
-  return Math.min(
-
-    difference,
-
-    360 -
-    difference
-
-  );
-
-}
-
-
-/*
- * Gera uma cor diferente para cada tema.
- *
- * Não existe uma lista fixa de temas.
- *
- * Portanto:
- * Cinema
- * História
- * Filosofia
- * Sociologia
- * Geografia
- * etc.
- *
- * funcionarão sem alterar o código.
- */
-
-function buildThemeColors() {
-
-  const themes = [
-
-    ...new Set(
-
-      state.subjects.map(
-        subject =>
-          subject.theme
-      )
-
+    .split(
+      /[,;|/]+/
     )
 
-  ]
-
-    .filter(
-      Boolean
+    .map(
+      normalizeDay
     )
 
-    .sort(
-      (
-        a,
-        b
-      ) =>
-
-        a.localeCompare(
-          b,
-          "pt-BR"
-        )
-    );
-
-
-  const usedHues =
-    [];
-
-
-  const colors =
-    new Map();
-
-
-  themes.forEach(
-    theme => {
-
-      let hue =
-        stringHash(
-          theme
-        )
-        %
-        360;
-
-
-      let attempts =
-        0;
-
-
-      while (
-
-        usedHues.some(
-          existingHue =>
-
-            hueDistance(
-              existingHue,
-              hue
-            )
-            <
-            34
-        )
-
-        &&
-
-        attempts <
-          12
-
-      ) {
-
-        hue =
-          (
-            hue + 47
-          )
-          %
-          360;
-
-
-        attempts +=
-          1;
-
-      }
-
-
-      usedHues.push(
-        hue
-      );
-
-
-      colors.set(
-
-        theme,
-
-        `hsl(${hue} 62% 54%)`
-
-      );
-
-    }
-  );
-
-
-  state.themeColors =
-    colors;
-
-}
-
-
-function themeColor(
-  theme
-) {
-
-  return (
-
-    state.themeColors.get(
-      theme
-    )
-
-    ||
-
-    "hsl(256 62% 54%)"
-
-  );
+    .filter(Boolean);
 
 }
 
@@ -1001,39 +730,25 @@ function themeColor(
 
 function readCell(
   row,
-  names
+  candidates
 ) {
 
   for (
-    const name
-    of names
+    const candidate
+    of candidates
   ) {
 
+    const value =
+      row[candidate];
+
+
     if (
-
-      row[
-        name
-      ] !==
-        undefined
-
-      &&
-
-      row[
-        name
-      ] !==
-        null
-
-      &&
-
-      String(
-        row[name]
-      ).trim() !== ""
-
+      value !== undefined &&
+      value !== null &&
+      String(value).trim() !== ""
     ) {
 
-      return row[
-        name
-      ];
+      return value;
 
     }
 
@@ -1045,256 +760,95 @@ function readCell(
 }
 
 
-/* =========================================================
-   DIAS OPCIONAIS NA PLANILHA
-========================================================= */
-
-function normalizeDay(
-  value
-) {
-
-  const text =
-    normalizeText(
-      value
-    );
-
-
-  if (
-    text.startsWith(
-      "seg"
-    )
-  ) {
-
-    return "segunda";
-
-  }
-
-
-  if (
-    text.startsWith(
-      "ter"
-    )
-  ) {
-
-    return "terca";
-
-  }
-
-
-  if (
-    text.startsWith(
-      "qua"
-    )
-  ) {
-
-    return "quarta";
-
-  }
-
-
-  if (
-    text.startsWith(
-      "qui"
-    )
-  ) {
-
-    return "quinta";
-
-  }
-
-
-  if (
-    text.startsWith(
-      "sex"
-    )
-  ) {
-
-    return "sexta";
-
-  }
-
-
-  if (
-    text.startsWith(
-      "sab"
-    )
-  ) {
-
-    return "sabado";
-
-  }
-
-
-  if (
-    text.startsWith(
-      "dom"
-    )
-  ) {
-
-    return "domingo";
-
-  }
-
-
-  return "";
-
-}
-
-
-function parseDays(
-  value
-) {
-
-  if (
-    !value
-  ) {
-
-    return [];
-
-  }
-
-
-  return String(
-    value
-  )
-
-    .split(
-      /[,;|/]+/
-    )
-
-    .map(
-      item =>
-        normalizeDay(
-          item
-        )
-    )
-
-    .filter(
-      Boolean
-    );
-
-}
-
-
-/* =========================================================
-   CONVERTER PLANILHA
-========================================================= */
-
-function rowsToSubjects(
-  rows
-) {
+function rowsToSubjects(rows) {
 
   return rows
 
     .map(
       row => {
 
-        const name =
+        let name =
           String(
-
             readCell(
-
               row,
-
               [
                 "Disciplina",
                 "disciplina"
               ]
-
             )
-
           ).trim();
+
+
+        if (
+          name ===
+          "Critícia Cinematográfica"
+        ) {
+
+          name =
+            "Crítica Cinematográfica";
+
+        }
 
 
         const theme =
           String(
-
             readCell(
-
               row,
-
               [
                 "Tema",
                 "tema"
               ]
-
             )
-
           ).trim();
 
 
         const total =
           Number(
-
             readCell(
-
               row,
-
               [
                 "Aulas totais",
                 "Aulas Totais",
                 "aulas totais",
                 "Total"
               ]
-
             )
-
           );
 
 
-        const rawDays =
-          readCell(
-
-            row,
-
-            [
-              "Dias",
-              "Dia",
-              "Dia da semana",
-              "dias",
-              "dia"
-            ]
-
+        const days =
+          parseDays(
+            readCell(
+              row,
+              [
+                "Dia",
+                "Dias",
+                "Dia da semana",
+                "dia",
+                "dias"
+              ]
+            )
           );
-
-
-        const correctedName =
-
-          name ===
-          "Critícia Cinematográfica"
-
-            ? "Crítica Cinematográfica"
-
-            : name;
 
 
         return {
 
           id:
-            slugify(
-              correctedName
-            ),
+            slugify(name),
 
-          name:
-            correctedName,
+          name,
 
           theme,
 
           total:
             Math.max(
-
               0,
-
               Math.floor(
                 total || 0
               )
-
             ),
 
-          days:
-            parseDays(
-              rawDays
-            )
+          days
 
         };
 
@@ -1303,28 +857,16 @@ function rowsToSubjects(
 
     .filter(
       subject =>
-
-        subject.name
-
-        &&
-
-        subject.theme
-
-        &&
-
-        subject.total >
-          0
+        subject.name &&
+        subject.theme &&
+        subject.total > 0
     );
 
 }
 
 
-/* =========================================================
-   LER XLSX
-========================================================= */
-
 function parseWorkbook(
-  arrayBuffer
+  buffer
 ) {
 
   if (
@@ -1333,7 +875,7 @@ function parseWorkbook(
   ) {
 
     throw new Error(
-      "Biblioteca XLSX não disponível."
+      "XLSX indisponível."
     );
 
   }
@@ -1341,43 +883,32 @@ function parseWorkbook(
 
   const workbook =
     XLSX.read(
-
-      arrayBuffer,
-
+      buffer,
       {
         type:
           "array"
       }
-
     );
 
 
-  const firstSheet =
+  const sheet =
     workbook.Sheets[
-
-      workbook
-        .SheetNames[0]
-
+      workbook.SheetNames[0]
     ];
 
 
   const rows =
-    XLSX.utils.sheet_to_json(
-
-      firstSheet,
-
-      {
-        defval:
-          ""
-      }
-
-    );
+    XLSX.utils
+      .sheet_to_json(
+        sheet,
+        {
+          defval: ""
+        }
+      );
 
 
   const subjects =
-    rowsToSubjects(
-      rows
-    );
+    rowsToSubjects(rows);
 
 
   if (
@@ -1385,7 +916,7 @@ function parseWorkbook(
   ) {
 
     throw new Error(
-      "Nenhuma disciplina válida encontrada."
+      "Nenhuma disciplina encontrada."
     );
 
   }
@@ -1397,49 +928,83 @@ function parseWorkbook(
 
 
 /* =========================================================
-   APLICAR NOVA PLANILHA
+   NORMALIZA PROGRESSO
 ========================================================= */
 
-function applySubjects(
-  subjects,
-  sourceLabel
-) {
+function normalizeProgress() {
 
-  state.subjects =
-    subjects;
-
-
-  state.openSubjects
-    .clear();
+  const validIds =
+    new Set(
+      state.subjects.map(
+        subject =>
+          subject.id
+      )
+    );
 
 
-  normalizeProgress();
+  Object.keys(
+    state.progress
+  ).forEach(
+    id => {
 
-  buildThemeColors();
+      if (
+        !validIds.has(id)
+      ) {
 
+        delete state.progress[id];
 
-  saveJSON(
-    STORAGE.dataset,
-    state.subjects
+      }
+
+    }
   );
 
 
-  renderAll();
+  state.subjects.forEach(
+    subject => {
+
+      state.progress[
+        subject.id
+      ] =
+        [
+          ...getCompletedSet(
+            subject.id
+          )
+        ]
+
+          .map(Number)
+
+          .filter(
+            lesson =>
+              Number.isInteger(
+                lesson
+              ) &&
+              lesson >= 1 &&
+              lesson <=
+                subject.total
+          )
+
+          .sort(
+            (a, b) =>
+              a - b
+          );
+
+    }
+  );
 
 
-  $(
-    "dataStatus"
-  ).textContent =
-    sourceLabel;
+  saveJSON(
+    STORAGE.progress,
+    state.progress
+  );
 
 }
 
 
 /* =========================================================
-   CARREGAR Estudos.xlsx AUTOMATICAMENTE
+   CARREGAR XLSX DA RAIZ
 ========================================================= */
 
-async function tryLoadRootSpreadsheet() {
+async function tryLoadSpreadsheet() {
 
   if (
     typeof XLSX ===
@@ -1455,14 +1020,11 @@ async function tryLoadRootSpreadsheet() {
 
     const response =
       await fetch(
-
         "./Estudos.xlsx",
-
         {
           cache:
             "no-store"
         }
-
       );
 
 
@@ -1481,33 +1043,34 @@ async function tryLoadRootSpreadsheet() {
 
 
     const subjects =
-      parseWorkbook(
-        buffer
-      );
+      parseWorkbook(buffer);
 
 
-    applySubjects(
+    state.subjects =
+      subjects;
 
-      subjects,
 
-      "Dados sincronizados com Estudos.xlsx."
+    normalizeProgress();
 
+
+    saveJSON(
+      STORAGE.dataset,
+      subjects
     );
 
-  }
 
-  catch (error) {
+    renderAll();
 
-    /*
-     * Se o usuário abrir diretamente no computador
-     * usando file://, o navegador pode impedir fetch.
-     *
-     * Nesse caso o dashboard continua funcionando
-     * normalmente com os dados armazenados.
-     */
+
+    $(
+      "dataStatus"
+    ).textContent =
+      "Dados sincronizados com Estudos.xlsx.";
+
+  } catch (error) {
 
     console.info(
-      "Estudos.xlsx não foi carregado automaticamente."
+      "Planilha da raiz não carregada."
     );
 
   }
@@ -1516,7 +1079,7 @@ async function tryLoadRootSpreadsheet() {
 
 
 /* =========================================================
-   IMPORTAR XLSX MANUALMENTE
+   IMPORTAÇÃO MANUAL
 ========================================================= */
 
 async function importSpreadsheet(
@@ -1524,18 +1087,11 @@ async function importSpreadsheet(
 ) {
 
   const file =
-    event.target
-      .files?.[
-        0
-      ];
+    event.target.files?.[0];
 
 
-  if (
-    !file
-  ) {
-
+  if (!file) {
     return;
-
   }
 
 
@@ -1547,486 +1103,61 @@ async function importSpreadsheet(
 
 
     const subjects =
-      parseWorkbook(
-        buffer
-      );
+      parseWorkbook(buffer);
 
 
-    applySubjects(
+    state.subjects =
+      subjects;
 
-      subjects,
 
-      `Planilha atualizada: ${file.name}`
+    state.openSubjects
+      .clear();
 
+
+    normalizeProgress();
+
+
+    saveJSON(
+      STORAGE.dataset,
+      subjects
     );
 
 
+    renderAll();
+
+
+    $(
+      "dataStatus"
+    ).textContent =
+      `Planilha: ${file.name}`;
+
+
     showToast(
-      "Planilha atualizada com sucesso.",
+      "Planilha atualizada.",
+      false
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    showToast(
+      "Não foi possível ler a planilha.",
       false
     );
 
   }
 
-  catch (error) {
 
-    console.error(
-      error
-    );
-
-
-    showToast(
-
-      "Não consegui ler a planilha. Verifique as colunas Disciplina, Tema e Aulas totais.",
-
-      false
-
-    );
-
-  }
-
-  finally {
-
-    event.target.value =
-      "";
-
-  }
+  event.target.value =
+    "";
 
 }
 
 
 /* =========================================================
-   LIMPAR PROGRESSO INVÁLIDO
-========================================================= */
-
-function normalizeProgress() {
-
-  const validIds =
-    new Set(
-
-      state.subjects.map(
-        subject =>
-          subject.id
-      )
-
-    );
-
-
-  Object.keys(
-    state.progress
-  ).forEach(
-    id => {
-
-      if (
-        !validIds.has(
-          id
-        )
-      ) {
-
-        delete state.progress[
-          id
-        ];
-
-      }
-
-    }
-  );
-
-
-  state.subjects.forEach(
-    subject => {
-
-      const cleaned = [
-
-        ...getCompletedSet(
-          subject.id
-        )
-
-      ]
-
-        .map(
-          Number
-        )
-
-        .filter(
-          lesson =>
-
-            Number.isInteger(
-              lesson
-            )
-
-            &&
-
-            lesson >= 1
-
-            &&
-
-            lesson <=
-              subject.total
-        )
-
-        .sort(
-          (
-            a,
-            b
-          ) =>
-            a - b
-        );
-
-
-      state.progress[
-        subject.id
-      ] =
-        cleaned;
-
-    }
-  );
-
-
-  saveJSON(
-    STORAGE.progress,
-    state.progress
-  );
-
-}
-
-
-/* =========================================================
-   MARCAR UMA AULA
-========================================================= */
-
-function setLesson(
-
-  subjectId,
-
-  lesson,
-
-  completed,
-
-  options = {}
-
-) {
-
-  const subject =
-    state.subjects.find(
-      item =>
-        item.id ===
-        subjectId
-    );
-
-
-  if (
-
-    !subject
-
-    ||
-
-    !Number.isInteger(
-      lesson
-    )
-
-    ||
-
-    lesson < 1
-
-    ||
-
-    lesson >
-      subject.total
-
-  ) {
-
-    return;
-
-  }
-
-
-  const set =
-    getCompletedSet(
-      subjectId
-    );
-
-
-  const previous =
-    set.has(
-      lesson
-    );
-
-
-  if (
-    previous ===
-    completed
-  ) {
-
-    return;
-
-  }
-
-
-  if (
-    completed
-  ) {
-
-    set.add(
-      lesson
-    );
-
-  }
-
-  else {
-
-    set.delete(
-      lesson
-    );
-
-  }
-
-
-  state.progress[
-    subjectId
-  ] = [
-
-    ...set
-
-  ].sort(
-    (
-      a,
-      b
-    ) =>
-      a - b
-  );
-
-
-  state.lastAction = {
-
-    subjectId,
-
-    lesson,
-
-    previous
-
-  };
-
-
-  saveJSON(
-    STORAGE.progress,
-    state.progress
-  );
-
-
-  renderAll();
-
-
-  if (
-    options.toast !==
-    false
-  ) {
-
-    showToast(
-
-      `${subject.name}: aula ${lesson} ${
-        completed
-          ? "concluída"
-          : "desmarcada"
-      }.`
-
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   +1
-========================================================= */
-
-function addNextLesson(
-  subjectId
-) {
-
-  const subject =
-    state.subjects.find(
-      item =>
-        item.id ===
-        subjectId
-    );
-
-
-  if (
-    !subject
-  ) {
-
-    return;
-
-  }
-
-
-  const lesson =
-    nextLesson(
-      subject
-    );
-
-
-  if (
-    lesson === null
-  ) {
-
-    return;
-
-  }
-
-
-  setLesson(
-
-    subjectId,
-
-    lesson,
-
-    true
-
-  );
-
-}
-
-
-/* =========================================================
-   -1
-========================================================= */
-
-function removeLastLesson(
-  subjectId
-) {
-
-  const completed = [
-
-    ...getCompletedSet(
-      subjectId
-    )
-
-  ].sort(
-    (
-      a,
-      b
-    ) =>
-      b - a
-  );
-
-
-  const lesson =
-    completed[
-      0
-    ];
-
-
-  if (
-    !lesson
-  ) {
-
-    return;
-
-  }
-
-
-  setLesson(
-
-    subjectId,
-
-    lesson,
-
-    false
-
-  );
-
-}
-
-
-/* =========================================================
-   DESFAZER
-========================================================= */
-
-function undoLastAction() {
-
-  if (
-    !state.lastAction
-  ) {
-
-    return;
-
-  }
-
-
-  const {
-
-    subjectId,
-
-    lesson,
-
-    previous
-
-  } =
-    state.lastAction;
-
-
-  const set =
-    getCompletedSet(
-      subjectId
-    );
-
-
-  if (
-    previous
-  ) {
-
-    set.add(
-      lesson
-    );
-
-  }
-
-  else {
-
-    set.delete(
-      lesson
-    );
-
-  }
-
-
-  state.progress[
-    subjectId
-  ] = [
-
-    ...set
-
-  ].sort(
-    (
-      a,
-      b
-    ) =>
-      a - b
-  );
-
-
-  state.lastAction =
-    null;
-
-
-  saveJSON(
-    STORAGE.progress,
-    state.progress
-  );
-
-
-  renderAll();
-
-  hideToast();
-
-}
-
-
-/* =========================================================
-   DISCIPLINAS DE HOJE
+   HOJE
 ========================================================= */
 
 function subjectsForToday() {
@@ -2036,66 +1167,50 @@ function subjectsForToday() {
 
 
   /*
-   * Primeiro tenta encontrar uma agenda
-   * definida dentro da planilha.
+   * Se a própria planilha possuir
+   * coluna Dia/Dias, ela tem prioridade.
    */
 
-  const spreadsheetSchedule =
+  const scheduled =
     state.subjects.filter(
       subject =>
-
         Array.isArray(
           subject.days
-        )
-
-        &&
-
-        subject.days.includes(
-          day
-        )
+        ) &&
+        subject.days.includes(day)
     );
 
 
   if (
-    spreadsheetSchedule.length
+    scheduled.length
   ) {
 
-    return spreadsheetSchedule;
+    return scheduled;
 
   }
 
 
-  /*
-   * Caso a planilha não possua Dia/Dias,
-   * usa o plano padrão.
-   */
-
-  const fallbackNames =
+  const names =
     FALLBACK_WEEK_PLAN[
       day
-    ]
-    ||
-    [];
+    ] || [];
 
 
   if (
-    fallbackNames.length
+    names.length
   ) {
 
-    const normalizedNames =
+    const normalized =
       new Set(
-
-        fallbackNames.map(
+        names.map(
           normalizeText
         )
-
       );
 
 
     return state.subjects.filter(
       subject =>
-
-        normalizedNames.has(
+        normalized.has(
           normalizeText(
             subject.name
           )
@@ -2106,41 +1221,27 @@ function subjectsForToday() {
 
 
   /*
-   * Domingo:
-   * sugere automaticamente a disciplina
-   * com menor porcentagem concluída.
+   * Domingo sem programação:
+   * disciplina menos avançada.
    */
 
   return [
-
     ...state.subjects
-
   ]
 
     .filter(
       subject =>
         remainingCount(
           subject
-        )
-        >
-        0
+        ) > 0
     )
 
     .sort(
-      (
-        a,
-        b
-      ) =>
-
-        percentage(a)
-        -
-        percentage(b)
-
-        ||
-
-        remainingCount(b)
-        -
-        remainingCount(a)
+      (a, b) =>
+        percentage(a) -
+          percentage(b) ||
+        remainingCount(b) -
+          remainingCount(a)
     )
 
     .slice(
@@ -2150,10 +1251,6 @@ function subjectsForToday() {
 
 }
 
-
-/* =========================================================
-   CARD HOJE
-========================================================= */
 
 function renderToday() {
 
@@ -2165,11 +1262,10 @@ function renderToday() {
     subjectsForToday();
 
 
-  $(
-    "todayLabel"
-  ).textContent =
-
-    `HOJE · ${getDayLabel(day).toUpperCase()}`;
+  const today =
+    document.querySelector(
+      ".today"
+    );
 
 
   if (
@@ -2183,9 +1279,9 @@ function renderToday() {
 
 
     $(
-      "todayMeta"
+      "todayDescription"
     ).textContent =
-      "Nenhuma disciplina foi programada para hoje.";
+      "Nenhuma disciplina programada para hoje.";
 
 
     $(
@@ -2199,59 +1295,60 @@ function renderToday() {
   }
 
 
-  const title =
-    subjects
+  const primary =
+    subjects.find(
+      subject =>
+        nextLesson(subject) !==
+        null
+    ) || subjects[0];
 
-      .map(
-        subject =>
-          subject.name
-      )
 
-      .join(
-        " + "
-      );
+  const color =
+    subjectColor(primary);
+
+
+  today.style.setProperty(
+    "--today-color",
+    color
+  );
 
 
   $(
     "todayTitle"
   ).textContent =
-    title;
+    subjects
+      .map(
+        subject =>
+          subject.name
+      )
+      .join(" + ");
 
 
-  const pendingSubjects =
-    subjects.filter(
-      subject =>
-        nextLesson(
-          subject
-        )
-        !==
-        null
-    );
+  const lesson =
+    nextLesson(primary);
 
 
   if (
-    !pendingSubjects.length
+    lesson === null
   ) {
 
     $(
-      "todayMeta"
+      "todayDescription"
     ).textContent =
-      "Tudo concluído nas disciplinas previstas para hoje.";
+      `${dayLabel(day)} · conteúdo previsto já concluído.`;
 
 
     $(
       "todayAction"
-    ).innerHTML = `
-
-      <button
-        class="today-button"
-        type="button"
-        disabled
-      >
-        Concluído
-      </button>
-
-    `;
+    ).innerHTML =
+      `
+        <button
+          class="today-button"
+          disabled
+        >
+          Concluído
+        </button>
+      `;
 
 
     return;
@@ -2259,80 +1356,37 @@ function renderToday() {
   }
 
 
-  const primarySubject =
-    pendingSubjects[
-      0
-    ];
-
-
-  const lesson =
-    nextLesson(
-      primarySubject
-    );
-
-
-  if (
-    subjects.length === 1
-  ) {
-
-    $(
-      "todayMeta"
-    ).textContent =
-
-      `Próxima: aula ${lesson} de ${primarySubject.total} · ${percentage(primarySubject)}% concluído.`;
-
-  }
-
-  else {
-
-    $(
-      "todayMeta"
-    ).textContent =
-
-      `${pendingSubjects.length} disciplinas previstas · comece por ${primarySubject.name}, aula ${lesson}.`;
-
-  }
+  $(
+    "todayDescription"
+  ).textContent =
+    `${dayLabel(day)} · próxima aula: ${lesson} de ${primary.total}.`;
 
 
   $(
     "todayAction"
-  ).innerHTML = `
-
-    <button
-
-      class="today-button"
-
-      id="todayCompleteButton"
-
-      type="button"
-
-      data-subject-id="${
-        primarySubject.id
-      }"
-
-    >
-
-      Marcar próxima aula
-
-    </button>
-
-  `;
+  ).innerHTML =
+    `
+      <button
+        type="button"
+        class="today-button"
+        id="todayButton"
+      >
+        Marcar próxima aula
+      </button>
+    `;
 
 
   $(
-    "todayCompleteButton"
-  )?.addEventListener(
-
+    "todayButton"
+  ).addEventListener(
     "click",
-
     () => {
 
       addNextLesson(
-        primarySubject.id
+        primary.id
       );
 
     }
-
   );
 
 }
@@ -2351,28 +1405,24 @@ function renderSummary() {
   $(
     "overallPercent"
   ).textContent =
-
     `${summary.percentage}%`;
 
 
   $(
-    "overallProgressBar"
+    "globalProgressBar"
   ).style.width =
-
     `${summary.percentage}%`;
 
 
   $(
-    "overallDetail"
+    "overallDescription"
   ).textContent =
-
     `${summary.completed} de ${summary.total} aulas concluídas`;
 
 
   $(
     "completedTotal"
   ).textContent =
-
     summary.completed
       .toLocaleString(
         "pt-BR"
@@ -2382,7 +1432,6 @@ function renderSummary() {
   $(
     "remainingTotal"
   ).textContent =
-
     summary.remaining
       .toLocaleString(
         "pt-BR"
@@ -2392,7 +1441,7 @@ function renderSummary() {
 
 
 /* =========================================================
-   AGRUPAR POR TEMA
+   AGRUPAMENTO POR TEMA
 ========================================================= */
 
 function themeGroups() {
@@ -2419,27 +1468,20 @@ function themeGroups() {
 
 
       groups
-        .get(
-          subject.theme
-        )
-        .push(
-          subject
-        );
+        .get(subject.theme)
+        .push(subject);
 
     }
   );
 
 
   return [
-
     ...groups.entries()
-
   ].sort(
     (
       [themeA],
       [themeB]
     ) =>
-
       themeA.localeCompare(
         themeB,
         "pt-BR"
@@ -2450,15 +1492,105 @@ function themeGroups() {
 
 
 /* =========================================================
-   DESTRUIR ROSCAS ANTIGAS
+   CHART BASE
+========================================================= */
+
+function createRingChart(
+  canvas,
+  completed,
+  remaining,
+  color
+) {
+
+  return new Chart(
+    canvas,
+    {
+
+      type:
+        "doughnut",
+
+      data: {
+
+        labels: [
+          "Concluído",
+          "Restante"
+        ],
+
+        datasets: [
+          {
+
+            data: [
+              completed,
+              remaining
+            ],
+
+            backgroundColor: [
+              color,
+              "#292a2e"
+            ],
+
+            borderWidth: 0,
+
+            hoverOffset: 2
+
+          }
+        ]
+
+      },
+
+      options: {
+
+        responsive: true,
+
+        maintainAspectRatio:
+          false,
+
+        cutout:
+          "79%",
+
+        animation: {
+          duration: 260
+        },
+
+        plugins: {
+
+          legend: {
+            display: false
+          },
+
+          tooltip: {
+
+            callbacks: {
+
+              label:
+                context =>
+                  ` ${context.label}: ${context.raw} aulas`
+
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   TEMAS
 ========================================================= */
 
 function destroyThemeCharts() {
 
-  state.themeCharts.forEach(
-    chart =>
-      chart.destroy()
-  );
+  state.themeCharts
+    .forEach(
+      chart =>
+        chart.destroy()
+    );
 
 
   state.themeCharts =
@@ -2466,10 +1598,6 @@ function destroyThemeCharts() {
 
 }
 
-
-/* =========================================================
-   ROSCAS DINÂMICAS
-========================================================= */
 
 function renderThemes() {
 
@@ -2483,61 +1611,40 @@ function renderThemes() {
   $(
     "themeGrid"
   ).innerHTML =
-
     groups
-
       .map(
         (
-          [
-            theme,
-            subjects
-          ],
+          [theme, subjects],
           index
         ) => {
 
           const summary =
-            totals(
-              subjects
-            );
+            totals(subjects);
 
 
           const color =
-            themeColor(
-              theme
-            );
+            themeColor(theme);
 
 
           return `
 
             <article
-
               class="theme-card"
-
               style="
-                --theme-color:${color}
+                --item-color:${color}
               "
-
             >
 
-              <div
-                class="theme-chart-wrap"
-              >
+              <div class="ring">
 
                 <canvas
-
-                  id="themeChart${index}"
-
-                  role="img"
-
-                  aria-label="${escapeHTML(theme)}: ${summary.percentage}% concluído"
-
+                  id="themeChart-${index}"
+                  aria-label="${escapeHTML(
+                    theme
+                  )}: ${summary.percentage}% concluído"
                 ></canvas>
 
-
-                <div
-                  class="theme-chart-center"
-                  aria-hidden="true"
-                >
+                <div class="ring__value">
 
                   <strong>
                     ${summary.percentage}%
@@ -2548,38 +1655,30 @@ function renderThemes() {
               </div>
 
 
-              <div
-                class="theme-card__body"
-              >
+              <div class="theme-card__text">
 
                 <h3>
 
                   <span
-                    class="theme-dot"
+                    class="color-dot"
                   ></span>
 
                   ${escapeHTML(theme)}
 
                 </h3>
 
+                <p>
+                  ${summary.completed} de
+                  ${summary.total} aulas
+                </p>
 
                 <p>
-
-                  ${summary.completed}
-                  de
-                  ${summary.total}
-                  aulas
-
-                  ·
-
                   ${subjects.length}
-
                   ${
                     subjects.length === 1
                       ? "disciplina"
                       : "disciplinas"
                   }
-
                 </p>
 
               </div>
@@ -2590,7 +1689,6 @@ function renderThemes() {
 
         }
       )
-
       .join("");
 
 
@@ -2606,155 +1704,32 @@ function renderThemes() {
 
   groups.forEach(
     (
-      [
-        theme,
-        subjects
-      ],
+      [theme, subjects],
       index
     ) => {
 
       const summary =
-        totals(
-          subjects
-        );
-
-
-      const color =
-        themeColor(
-          theme
-        );
-
-
-      const canvas =
-        $(
-          `themeChart${index}`
-        );
-
-
-      if (
-        !canvas
-      ) {
-
-        return;
-
-      }
+        totals(subjects);
 
 
       const chart =
-        new Chart(
+        createRingChart(
 
-          canvas,
+          $(
+            `themeChart-${index}`
+          ),
 
-          {
+          summary.completed,
 
-            type:
-              "doughnut",
+          summary.remaining,
 
-
-            data: {
-
-              labels: [
-
-                "Concluído",
-
-                "Restante"
-
-              ],
-
-
-              datasets: [
-
-                {
-
-                  data: [
-
-                    summary.completed,
-
-                    summary.remaining
-
-                  ],
-
-
-                  backgroundColor: [
-
-                    color,
-
-                    "#ece9f0"
-
-                  ],
-
-
-                  borderWidth:
-                    0,
-
-
-                  hoverOffset:
-                    2
-
-                }
-
-              ]
-
-            },
-
-
-            options: {
-
-              responsive:
-                true,
-
-
-              maintainAspectRatio:
-                false,
-
-
-              cutout:
-                "76%",
-
-
-              animation: {
-
-                duration:
-                  280
-
-              },
-
-
-              plugins: {
-
-                legend: {
-
-                  display:
-                    false
-
-                },
-
-
-                tooltip: {
-
-                  callbacks: {
-
-                    label:
-                      context =>
-
-                        ` ${context.label}: ${context.raw} aulas`
-
-                  }
-
-                }
-
-              }
-
-            }
-
-          }
+          themeColor(theme)
 
         );
 
 
-      state.themeCharts.push(
-        chart
-      );
+      state.themeCharts
+        .push(chart);
 
     }
   );
@@ -2763,276 +1738,25 @@ function renderThemes() {
 
 
 /* =========================================================
-   AULAS RESTANTES POR DISCIPLINA
+   DISCIPLINAS
 ========================================================= */
 
-function renderRemainingChart() {
+function destroySubjectCharts() {
 
-  if (
-    typeof Chart ===
-    "undefined"
-  ) {
-
-    return;
-
-  }
-
-
-  if (
-    state.remainingChart
-  ) {
-
-    state.remainingChart
-      .destroy();
-
-
-    state.remainingChart =
-      null;
-
-  }
-
-
-  const sorted = [
-
-    ...state.subjects
-
-  ].sort(
-    (
-      a,
-      b
-    ) =>
-
-      remainingCount(b)
-      -
-      remainingCount(a)
-
-      ||
-
-      a.name.localeCompare(
-        b.name,
-        "pt-BR"
-      )
-  );
-
-
-  const container =
-    $(
-      "remainingChartContainer"
+  state.subjectCharts
+    .forEach(
+      chart =>
+        chart.destroy()
     );
 
 
-  container.style.height =
-
-    `${Math.max(
-      300,
-      sorted.length * 42 + 60
-    )}px`;
-
-
-  state.remainingChart =
-    new Chart(
-
-      $(
-        "remainingChart"
-      ),
-
-      {
-
-        type:
-          "bar",
-
-
-        data: {
-
-          labels:
-
-            sorted.map(
-              subject =>
-                subject.name
-            ),
-
-
-          datasets: [
-
-            {
-
-              data:
-
-                sorted.map(
-                  subject =>
-                    remainingCount(
-                      subject
-                    )
-                ),
-
-
-              backgroundColor:
-
-                sorted.map(
-                  subject =>
-                    themeColor(
-                      subject.theme
-                    )
-                ),
-
-
-              borderRadius:
-                8,
-
-
-              borderSkipped:
-                false,
-
-
-              maxBarThickness:
-                22
-
-            }
-
-          ]
-
-        },
-
-
-        options: {
-
-          indexAxis:
-            "y",
-
-
-          responsive:
-            true,
-
-
-          maintainAspectRatio:
-            false,
-
-
-          animation: {
-
-            duration:
-              280
-
-          },
-
-
-          plugins: {
-
-            legend: {
-
-              display:
-                false
-
-            },
-
-
-            tooltip: {
-
-              callbacks: {
-
-                label:
-                  context =>
-
-                    ` ${context.raw} aulas restantes`
-
-              }
-
-            }
-
-          },
-
-
-          scales: {
-
-            x: {
-
-              beginAtZero:
-                true,
-
-
-              grid: {
-
-                color:
-                  "rgba(44, 38, 55, 0.06)"
-
-              },
-
-
-              border: {
-
-                display:
-                  false
-
-              },
-
-
-              ticks: {
-
-                precision:
-                  0
-
-              }
-
-            },
-
-
-            y: {
-
-              grid: {
-
-                display:
-                  false
-
-              },
-
-
-              border: {
-
-                display:
-                  false
-
-              },
-
-
-              ticks: {
-
-                autoSkip:
-                  false,
-
-
-                color:
-                  "#5f5a65",
-
-
-                font: {
-
-                  size:
-                    11
-
-                }
-
-              }
-
-            }
-
-          }
-
-        }
-
-      }
-
-    );
+  state.subjectCharts =
+    [];
 
 }
 
 
-/* =========================================================
-   AULAS INDIVIDUAIS
-========================================================= */
-
-function lessonGridTemplate(
-  subject
-) {
+function lessonTemplate(subject) {
 
   const completed =
     getCompletedSet(
@@ -3040,37 +1764,33 @@ function lessonGridTemplate(
     );
 
 
+  const color =
+    subjectColor(subject);
+
+
   return `
 
     <div
       class="lesson-panel"
+      style="
+        --item-color:${color}
+      "
     >
 
-      <p
-        class="lesson-panel__hint"
-      >
-        Toque em uma aula para marcar ou desmarcar.
+      <p>
+        Clique em uma aula para marcar ou desmarcar.
       </p>
 
-
-      <div
-        class="lesson-grid"
-      >
+      <div class="lesson-grid">
 
         ${
           Array.from(
-
             {
               length:
                 subject.total
             },
-
-            (
-              _,
-              index
-            ) =>
+            (_, index) =>
               index + 1
-
           )
 
             .map(
@@ -3078,8 +1798,10 @@ function lessonGridTemplate(
 
                 <button
 
+                  type="button"
+
                   class="
-                    lesson-button
+                    lesson
                     ${
                       completed.has(
                         lesson
@@ -3089,8 +1811,6 @@ function lessonGridTemplate(
                     }
                   "
 
-                  type="button"
-
                   data-action="lesson"
 
                   data-subject-id="${
@@ -3099,12 +1819,6 @@ function lessonGridTemplate(
 
                   data-lesson="${
                     lesson
-                  }"
-
-                  aria-pressed="${
-                    completed.has(
-                      lesson
-                    )
                   }"
 
                 >
@@ -3128,121 +1842,111 @@ function lessonGridTemplate(
 }
 
 
-/* =========================================================
-   CARD DISCIPLINA
-========================================================= */
-
 function subjectTemplate(
-  subject
+  subject,
+  index
 ) {
 
   const completed =
-    completedCount(
-      subject
-    );
+    completedCount(subject);
+
+
+  const remaining =
+    remainingCount(subject);
 
 
   const percent =
-    percentage(
-      subject
-    );
+    percentage(subject);
 
 
   const color =
-    themeColor(
-      subject.theme
+    subjectColor(subject);
+
+
+  const open =
+    state.openSubjects.has(
+      subject.id
     );
 
 
-  const isComplete =
-    completed >=
-    subject.total;
-
-
-  const isOpen =
-    state.openSubjects
-      .has(
-        subject.id
-      );
+  const finished =
+    remaining === 0;
 
 
   return `
 
     <article
-
       class="subject-card"
-
       style="
-        --theme-color:${color}
+        --item-color:${color}
       "
-
     >
 
+      <div class="subject-card__main">
 
-      <div
-        class="subject-card__main"
-      >
+        <div class="subject-ring">
 
+          <canvas
+            id="subjectChart-${index}"
+            aria-label="${escapeHTML(
+              subject.name
+            )}: ${percent}% concluído"
+          ></canvas>
 
-        <div>
+          <div class="subject-ring__value">
 
-
-          <div
-            class="subject-card__heading"
-          >
-
-
-            <div
-              class="subject-card__title-wrap"
-            >
-
-
-              <span
-                class="subject-card__theme"
-              >
-
-                <span
-                  class="theme-dot"
-                ></span>
-
-                ${
-                  escapeHTML(
-                    subject.theme
-                  )
-                }
-
-              </span>
-
-
-              <h3>
-
-                ${
-                  escapeHTML(
-                    subject.name
-                  )
-                }
-
-              </h3>
-
-
-            </div>
-
-
-            <span
-              class="subject-card__percentage"
-            >
-
+            <strong>
               ${percent}%
+            </strong>
 
+            <span>
+              concluído
             </span>
 
+          </div>
+
+        </div>
+
+
+        <div class="subject-card__content">
+
+          <span class="subject-theme">
+
+            <span
+              class="color-dot"
+            ></span>
+
+            ${escapeHTML(
+              subject.theme
+            )}
+
+          </span>
+
+
+          <h3>
+            ${escapeHTML(
+              subject.name
+            )}
+          </h3>
+
+
+          <div class="subject-meta">
+
+            ${completed}
+            de
+            ${subject.total}
+            aulas
+
+            ·
+
+            ${remaining}
+            restantes
 
           </div>
 
 
           <div
             class="subject-progress"
-            aria-hidden="true"
           >
 
             <span
@@ -3254,152 +1958,92 @@ function subjectTemplate(
           </div>
 
 
-          <div
-            class="subject-card__meta"
-          >
+          <div class="subject-actions">
 
-            ${completed}
-            de
-            ${subject.total}
-            aulas
+            <button
+              type="button"
+              class="action-small"
+              data-action="minus"
+              data-subject-id="${
+                subject.id
+              }"
+              ${
+                completed === 0
+                  ? "disabled"
+                  : ""
+              }
+            >
+              −
+            </button>
+
+
+            <button
+              type="button"
+              class="action-primary"
+              data-action="plus"
+              data-subject-id="${
+                subject.id
+              }"
+              ${
+                finished
+                  ? "disabled"
+                  : ""
+              }
+            >
+              ${
+                finished
+                  ? "Concluída"
+                  : "+1 aula"
+              }
+            </button>
+
+
+            <button
+              type="button"
+              class="action-small"
+              data-action="plus"
+              data-subject-id="${
+                subject.id
+              }"
+              ${
+                finished
+                  ? "disabled"
+                  : ""
+              }
+            >
+              +
+            </button>
+
+
+            <button
+              type="button"
+              class="action-details"
+              data-action="details"
+              data-subject-id="${
+                subject.id
+              }"
+            >
+              ${
+                open
+                  ? "Ocultar"
+                  : "Ver aulas"
+              }
+            </button>
 
           </div>
 
-
         </div>
-
-
-        <div
-          class="subject-actions"
-        >
-
-
-          <button
-
-            class="icon-button"
-
-            type="button"
-
-            data-action="minus"
-
-            data-subject-id="${
-              subject.id
-            }"
-
-            aria-label="Desmarcar a última aula de ${escapeHTML(subject.name)}"
-
-            ${
-              completed === 0
-                ? "disabled"
-                : ""
-            }
-
-          >
-
-            −
-
-          </button>
-
-
-          <button
-
-            class="primary-button"
-
-            type="button"
-
-            data-action="plus"
-
-            data-subject-id="${
-              subject.id
-            }"
-
-            ${
-              isComplete
-                ? "disabled"
-                : ""
-            }
-
-          >
-
-            ${
-              isComplete
-                ? "Concluída"
-                : "+1 aula"
-            }
-
-          </button>
-
-
-          <button
-
-            class="icon-button"
-
-            type="button"
-
-            data-action="plus"
-
-            data-subject-id="${
-              subject.id
-            }"
-
-            aria-label="Marcar a próxima aula de ${escapeHTML(subject.name)}"
-
-            ${
-              isComplete
-                ? "disabled"
-                : ""
-            }
-
-          >
-
-            +
-
-          </button>
-
-
-          <button
-
-            class="details-button"
-
-            type="button"
-
-            data-action="details"
-
-            data-subject-id="${
-              subject.id
-            }"
-
-            aria-expanded="${
-              isOpen
-            }"
-
-          >
-
-            ${
-              isOpen
-                ? "Ocultar aulas"
-                : "Ver aulas"
-            }
-
-          </button>
-
-
-        </div>
-
 
       </div>
 
 
       ${
-        isOpen
-
-          ? lessonGridTemplate(
+        open
+          ? lessonTemplate(
               subject
             )
-
           : ""
       }
-
 
     </article>
 
@@ -3408,16 +2052,14 @@ function subjectTemplate(
 }
 
 
-/* =========================================================
-   RENDER DISCIPLINAS
-========================================================= */
-
 function renderSubjects() {
+
+  destroySubjectCharts();
+
 
   $(
     "subjectCount"
   ).textContent =
-
     `${state.subjects.length} ${
       state.subjects.length === 1
         ? "disciplina"
@@ -3425,51 +2067,23 @@ function renderSubjects() {
     }`;
 
 
-  if (
-    !state.subjects.length
-  ) {
-
-    $(
-      "subjectList"
-    ).innerHTML = `
-
-      <div
-        class="empty-state"
-      >
-        Nenhuma disciplina encontrada.
-      </div>
-
-    `;
-
-
-    return;
-
-  }
-
-
   $(
-    "subjectList"
+    "subjectGrid"
   ).innerHTML =
-
     state.subjects
-
       .map(
         subjectTemplate
       )
-
       .join("");
 
 
   /*
-   * Os eventos são adicionados NOVAMENTE
-   * depois que cada card é renderizado.
-   *
-   * Isso evita o problema anterior em que
-   * os botões paravam de funcionar.
+   * Eventos são associados novamente
+   * após cada renderização.
    */
 
   $(
-    "subjectList"
+    "subjectGrid"
   )
 
     .querySelectorAll(
@@ -3480,15 +2094,51 @@ function renderSubjects() {
       button => {
 
         button.addEventListener(
-
           "click",
-
           handleSubjectAction
-
         );
 
       }
     );
+
+
+  if (
+    typeof Chart ===
+    "undefined"
+  ) {
+
+    return;
+
+  }
+
+
+  state.subjects.forEach(
+    (
+      subject,
+      index
+    ) => {
+
+      const chart =
+        createRingChart(
+
+          $(
+            `subjectChart-${index}`
+          ),
+
+          completedCount(subject),
+
+          remainingCount(subject),
+
+          subjectColor(subject)
+
+        );
+
+
+      state.subjectCharts
+        .push(chart);
+
+    }
+  );
 
 }
 
@@ -3514,17 +2164,7 @@ function handleSubjectAction(
 
 
   if (
-    !subjectId
-  ) {
-
-    return;
-
-  }
-
-
-  if (
-    action ===
-    "plus"
+    action === "plus"
   ) {
 
     addNextLesson(
@@ -3538,8 +2178,7 @@ function handleSubjectAction(
 
 
   if (
-    action ===
-    "minus"
+    action === "minus"
   ) {
 
     removeLastLesson(
@@ -3553,8 +2192,7 @@ function handleSubjectAction(
 
 
   if (
-    action ===
-    "details"
+    action === "details"
   ) {
 
     if (
@@ -3567,9 +2205,7 @@ function handleSubjectAction(
         subjectId
       );
 
-    }
-
-    else {
+    } else {
 
       state.openSubjects.add(
         subjectId
@@ -3587,8 +2223,7 @@ function handleSubjectAction(
 
 
   if (
-    action ===
-    "lesson"
+    action === "lesson"
   ) {
 
     const lesson =
@@ -3606,16 +2241,265 @@ function handleSubjectAction(
 
 
     setLesson(
-
       subjectId,
-
       lesson,
-
       !completed
-
     );
 
   }
+
+}
+
+
+/* =========================================================
+   MARCAR AULA
+========================================================= */
+
+function setLesson(
+  subjectId,
+  lesson,
+  completed,
+  options = {}
+) {
+
+  const subject =
+    state.subjects.find(
+      item =>
+        item.id === subjectId
+    );
+
+
+  if (
+    !subject ||
+    !Number.isInteger(lesson) ||
+    lesson < 1 ||
+    lesson > subject.total
+  ) {
+
+    return;
+
+  }
+
+
+  const set =
+    getCompletedSet(
+      subjectId
+    );
+
+
+  const previous =
+    set.has(lesson);
+
+
+  if (
+    previous === completed
+  ) {
+
+    return;
+
+  }
+
+
+  if (completed) {
+
+    set.add(lesson);
+
+  } else {
+
+    set.delete(lesson);
+
+  }
+
+
+  state.progress[
+    subjectId
+  ] =
+    [...set]
+      .sort(
+        (a, b) =>
+          a - b
+      );
+
+
+  state.lastAction = {
+
+    subjectId,
+
+    lesson,
+
+    previous
+
+  };
+
+
+  saveJSON(
+    STORAGE.progress,
+    state.progress
+  );
+
+
+  renderAll();
+
+
+  if (
+    options.toast !== false
+  ) {
+
+    showToast(
+      `${subject.name}: aula ${lesson} ${
+        completed
+          ? "concluída"
+          : "desmarcada"
+      }.`
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   +1
+========================================================= */
+
+function addNextLesson(
+  subjectId
+) {
+
+  const subject =
+    state.subjects.find(
+      subject =>
+        subject.id ===
+        subjectId
+    );
+
+
+  if (!subject) {
+    return;
+  }
+
+
+  const lesson =
+    nextLesson(subject);
+
+
+  if (
+    lesson === null
+  ) {
+
+    return;
+
+  }
+
+
+  setLesson(
+    subjectId,
+    lesson,
+    true
+  );
+
+}
+
+
+/* =========================================================
+   -1
+========================================================= */
+
+function removeLastLesson(
+  subjectId
+) {
+
+  const lessons =
+    [
+      ...getCompletedSet(
+        subjectId
+      )
+    ].sort(
+      (a, b) =>
+        b - a
+    );
+
+
+  const lesson =
+    lessons[0];
+
+
+  if (!lesson) {
+    return;
+  }
+
+
+  setLesson(
+    subjectId,
+    lesson,
+    false
+  );
+
+}
+
+
+/* =========================================================
+   DESFAZER
+========================================================= */
+
+function undoLastAction() {
+
+  if (
+    !state.lastAction
+  ) {
+
+    return;
+
+  }
+
+
+  const {
+    subjectId,
+    lesson,
+    previous
+  } =
+    state.lastAction;
+
+
+  const set =
+    getCompletedSet(
+      subjectId
+    );
+
+
+  if (previous) {
+
+    set.add(lesson);
+
+  } else {
+
+    set.delete(lesson);
+
+  }
+
+
+  state.progress[
+    subjectId
+  ] =
+    [...set].sort(
+      (a, b) =>
+        a - b
+    );
+
+
+  state.lastAction =
+    null;
+
+
+  saveJSON(
+    STORAGE.progress,
+    state.progress
+  );
+
+
+  renderAll();
+
+  hideToast();
 
 }
 
@@ -3626,8 +2510,7 @@ function handleSubjectAction(
 
 function showToast(
   message,
-  showUndo =
-    true
+  allowUndo = true
 ) {
 
   clearTimeout(
@@ -3644,7 +2527,7 @@ function showToast(
   $(
     "toastUndo"
   ).hidden =
-    !showUndo;
+    !allowUndo;
 
 
   $(
@@ -3656,11 +2539,8 @@ function showToast(
 
   state.toastTimer =
     setTimeout(
-
       hideToast,
-
-      3600
-
+      3500
     );
 
 }
@@ -3678,35 +2558,25 @@ function hideToast() {
 
 
 /* =========================================================
-   ZERAR PROGRESSO
+   RESET
 ========================================================= */
 
 function resetProgress() {
 
   const confirmed =
     window.confirm(
-
-      "Zerar todo o progresso marcado? Essa ação não pode ser desfeita."
-
+      "Deseja realmente zerar todo o progresso?"
     );
 
 
-  if (
-    !confirmed
-  ) {
-
+  if (!confirmed) {
     return;
-
   }
 
 
-  state.progress =
-    {};
+  state.progress = {};
 
-
-  state.lastAction =
-    null;
-
+  state.lastAction = null;
 
   state.openSubjects
     .clear();
@@ -3726,12 +2596,10 @@ function resetProgress() {
 
 
 /* =========================================================
-   RENDER COMPLETO
+   RENDER
 ========================================================= */
 
 function renderAll() {
-
-  buildThemeColors();
 
   renderToday();
 
@@ -3739,15 +2607,13 @@ function renderAll() {
 
   renderThemes();
 
-  renderRemainingChart();
-
   renderSubjects();
 
 }
 
 
 /* =========================================================
-   EVENTOS FIXOS
+   EVENTOS
 ========================================================= */
 
 function bindEvents() {
@@ -3755,40 +2621,31 @@ function bindEvents() {
   $(
     "xlsxInput"
   ).addEventListener(
-
     "change",
-
     importSpreadsheet
-
   );
 
 
   $(
     "toastUndo"
   ).addEventListener(
-
     "click",
-
     undoLastAction
-
   );
 
 
   $(
     "resetProgress"
   ).addEventListener(
-
     "click",
-
     resetProgress
-
   );
 
 }
 
 
 /* =========================================================
-   INICIALIZAR
+   INICIAR
 ========================================================= */
 
 function init() {
@@ -3801,26 +2658,12 @@ function init() {
 
   normalizeProgress();
 
-  buildThemeColors();
-
   bindEvents();
 
   renderAll();
 
 
-  $(
-    "dataStatus"
-  ).textContent =
-    "Dados salvos neste navegador.";
-
-
-  /*
-   * Quando estiver no GitHub Pages,
-   * procura Estudos.xlsx automaticamente
-   * na mesma pasta.
-   */
-
-  tryLoadRootSpreadsheet();
+  tryLoadSpreadsheet();
 
 }
 
