@@ -1,295 +1,228 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-
 <head>
-  <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <meta
-    name="theme-color"
-    content="#161719"
-  >
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2F3E46">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Dashboard de estudos responsivo integrado a uma planilha XLSX.">
   <title>Painel de Estudos</title>
-
-  <link
-    rel="stylesheet"
-    href="styles.css"
-  >
+  <link rel="preconnect" href="https://cdn.sheetjs.com">
+  <link rel="stylesheet" href="styles.css">
 </head>
-
 <body>
+  <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
 
-  <main class="app">
+  <header class="app-header">
+    <div class="app-header__inner container">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true">E</span>
+        <div>
+          <p class="eyebrow">ORGANIZAÇÃO PESSOAL</p>
+          <h1>Painel de Estudos</h1>
+        </div>
+      </div>
 
-    <!-- =========================================
-         CABEÇALHO
-    ========================================== -->
+      <div class="header-actions">
+        <div class="sync-status" id="syncStatus" role="status" aria-live="polite">
+          <span class="sync-dot" aria-hidden="true"></span>
+          <span id="syncStatusText">Carregando planilha…</span>
+        </div>
+        <button class="btn btn--light" id="syncButton" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5M4 18v-5h5M18.4 9A7 7 0 0 0 6.2 6.4L4 11m16 2-2.2 4.6A7 7 0 0 1 5.6 15"/></svg>
+          Sincronizar
+        </button>
+      </div>
+    </div>
+  </header>
 
-    <header class="header">
-
+  <div class="subheader">
+    <div class="container subheader__inner">
       <div>
-
-        <span class="kicker">
-          ESTUDOS
-        </span>
-
-        <h1>
-          Meu progresso
-        </h1>
-
-        <p
-          class="date"
-          id="currentDate"
-        ></p>
-
+        <p id="todayDate" class="today-date">Hoje</p>
+        <p id="todaySummary" class="today-summary">Preparando suas matérias…</p>
       </div>
 
-
-      <label
-        class="import-button"
-        for="xlsxInput"
-      >
-        Atualizar planilha
-      </label>
-
-      <input
-        type="file"
-        id="xlsxInput"
-        accept=".xlsx,.xls"
-        hidden
-      >
-
-    </header>
-
-
-    <!-- =========================================
-         HOJE
-    ========================================== -->
-
-    <section class="today">
-
-      <div class="today__content">
-
-        <span class="today__label">
-          HOJE
-        </span>
-
-        <h2 id="todayTitle">
-          Carregando…
-        </h2>
-
-        <p id="todayDescription">
-          Preparando sua rotina.
-        </p>
-
+      <div class="tabs" role="tablist" aria-label="Seções do painel">
+        <button class="tab is-active" id="tab-overview" role="tab" aria-selected="true" aria-controls="panel-overview" tabindex="0" data-tab="overview" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z"/></svg>
+          Visão geral
+        </button>
+        <button class="tab" id="tab-lessons" role="tab" aria-selected="false" aria-controls="panel-lessons" tabindex="-1" data-tab="lessons" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Zm0 0V18a2.5 2.5 0 0 1 2.5-2.5H20"/></svg>
+          Aulas
+        </button>
       </div>
-
-
-      <div
-        class="today__action"
-        id="todayAction"
-      ></div>
-
-    </section>
-
-
-    <!-- =========================================
-         RESUMO
-    ========================================== -->
-
-    <section class="summary">
-
-      <article class="summary__progress">
-
-        <div class="summary__progress-top">
-
-          <span>
-            Progresso geral
-          </span>
-
-          <strong id="overallPercent">
-            0%
-          </strong>
-
-        </div>
-
-        <div class="global-progress">
-
-          <span
-            id="globalProgressBar"
-          ></span>
-
-        </div>
-
-        <small id="overallDescription">
-          0 de 0 aulas
-        </small>
-
-      </article>
-
-
-      <article class="summary__number">
-
-        <span>
-          Concluídas
-        </span>
-
-        <strong id="completedTotal">
-          0
-        </strong>
-
-      </article>
-
-
-      <article class="summary__number">
-
-        <span>
-          Restantes
-        </span>
-
-        <strong id="remainingTotal">
-          0
-        </strong>
-
-      </article>
-
-    </section>
-
-
-    <!-- =========================================
-         TEMAS
-    ========================================== -->
-
-    <section class="section">
-
-      <header class="section__header">
-
-        <div>
-
-          <span class="kicker">
-            ÁREAS
-          </span>
-
-          <h2>
-            Temas
-          </h2>
-
-        </div>
-
-        <p>
-          Visão geral do avanço em cada área.
-        </p>
-
-      </header>
-
-
-      <div
-        class="theme-grid"
-        id="themeGrid"
-      ></div>
-
-    </section>
-
-
-    <!-- =========================================
-         DISCIPLINAS
-    ========================================== -->
-
-    <section class="section">
-
-      <header class="section__header">
-
-        <div>
-
-          <span class="kicker">
-            DETALHAMENTO
-          </span>
-
-          <h2>
-            Disciplinas
-          </h2>
-
-        </div>
-
-        <span
-          class="counter"
-          id="subjectCount"
-        ></span>
-
-      </header>
-
-
-      <div
-        class="subject-grid"
-        id="subjectGrid"
-      ></div>
-
-    </section>
-
-
-    <!-- =========================================
-         RODAPÉ
-    ========================================== -->
-
-    <footer class="footer">
-
-      <span id="dataStatus">
-        Dados salvos neste navegador.
-      </span>
-
-      <button
-        type="button"
-        id="resetProgress"
-      >
-        Zerar progresso
-      </button>
-
-    </footer>
-
-  </main>
-
-
-  <!-- =========================================
-       TOAST
-  ========================================== -->
-
-  <div
-    class="toast"
-    id="toast"
-    aria-live="polite"
-  >
-
-    <span id="toastMessage"></span>
-
-    <button
-      type="button"
-      id="toastUndo"
-    >
-      Desfazer
-    </button>
-
+    </div>
   </div>
 
+  <main id="main-content" class="container main-content">
+    <section id="panel-overview" class="tab-panel" role="tabpanel" aria-labelledby="tab-overview" tabindex="0">
+      <div id="overviewLoading" class="loading-panel" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        Lendo <strong>Estudos.xlsx</strong>…
+      </div>
 
-  <!-- =========================================
-       BIBLIOTECAS
-  ========================================== -->
+      <div id="overviewContent" hidden>
+        <section class="hero-grid" aria-label="Resumo do progresso">
+          <article class="progress-hero card card--dark">
+            <div>
+              <p class="eyebrow eyebrow--light">PROGRESSO GERAL</p>
+              <h2 id="globalProgressLabel">0%</h2>
+              <p id="globalProgressText">0 de 0 aulas concluídas</p>
+            </div>
+            <div class="progress-ring" id="globalProgressRing" aria-label="Progresso geral de 0%" role="img">
+              <div class="progress-ring__inner">
+                <strong id="globalProgressRingText">0%</strong>
+                <span>concluído</span>
+              </div>
+            </div>
+          </article>
 
-  <script
-    src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"
-  ></script>
+          <article class="metric card">
+            <div class="metric__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 3v4M16 3v4M4 9h16"/></svg>
+            </div>
+            <div><span>Disciplinas</span><strong id="metricCourses">0</strong></div>
+          </article>
 
-  <script
-    src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
-  ></script>
+          <article class="metric card">
+            <div class="metric__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg>
+            </div>
+            <div><span>Total de aulas</span><strong id="metricLessons">0</strong></div>
+          </article>
 
+          <article class="metric card">
+            <div class="metric__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>
+            </div>
+            <div><span>Concluídas</span><strong id="metricCompleted">0</strong></div>
+          </article>
+        </section>
+
+        <section class="section-block" aria-labelledby="todayHeading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">FOCO DO DIA</p>
+              <h2 id="todayHeading">Matérias de hoje</h2>
+            </div>
+            <span class="badge" id="todayCountBadge">0 matérias</span>
+          </div>
+          <div id="todayCourses" class="today-courses"></div>
+        </section>
+
+        <section class="overview-columns">
+          <div class="section-block">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">ACOMPANHAMENTO</p>
+                <h2>Progresso por disciplina</h2>
+              </div>
+            </div>
+            <div id="courseProgressList" class="course-progress-list"></div>
+          </div>
+
+          <aside class="side-stack">
+            <section class="card schedule-card" aria-labelledby="weekHeading">
+              <div class="section-heading section-heading--compact">
+                <div>
+                  <p class="eyebrow">ROTINA</p>
+                  <h2 id="weekHeading">Semana</h2>
+                </div>
+              </div>
+              <div id="weekSchedule" class="week-schedule"></div>
+            </section>
+
+            <section class="card data-card" aria-labelledby="dataHeading">
+              <div class="section-heading section-heading--compact">
+                <div>
+                  <p class="eyebrow">DADOS</p>
+                  <h2 id="dataHeading">Planilha e backup</h2>
+                </div>
+              </div>
+              <p class="muted">O progresso fica salvo neste navegador. Sincronizar a planilha atualiza disciplinas e quantidade de aulas sem apagar o que já foi marcado.</p>
+              <div class="data-actions">
+                <button class="btn btn--secondary btn--full" id="importSheetButton" type="button">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
+                  Importar XLSX local
+                </button>
+                <button class="btn btn--ghost btn--full" id="exportBackupButton" type="button">Exportar backup do progresso</button>
+                <button class="btn btn--ghost btn--full" id="importBackupButton" type="button">Restaurar backup</button>
+              </div>
+              <p class="last-sync" id="lastSyncText">Ainda não sincronizado.</p>
+            </section>
+          </aside>
+        </section>
+      </div>
+    </section>
+
+    <section id="panel-lessons" class="tab-panel" role="tabpanel" aria-labelledby="tab-lessons" tabindex="0" hidden>
+      <div class="lessons-toolbar card">
+        <div class="toolbar-main">
+          <label class="search-field">
+            <span class="sr-only">Buscar disciplina</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+            <input id="courseSearch" type="search" placeholder="Buscar disciplina ou instituição" autocomplete="off">
+          </label>
+
+          <label class="select-field">
+            <span class="sr-only">Filtrar por dia</span>
+            <select id="dayFilter">
+              <option value="all">Todos os dias</option>
+              <option value="0">Domingo</option>
+              <option value="1">Segunda</option>
+              <option value="2">Terça</option>
+              <option value="3">Quarta</option>
+              <option value="4">Quinta</option>
+              <option value="5">Sexta</option>
+              <option value="6">Sábado</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="toolbar-actions">
+          <button class="btn btn--secondary" id="expandAllButton" type="button">Expandir</button>
+          <button class="btn btn--danger-soft" id="completeEverythingButton" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
+            Concluir tudo
+          </button>
+        </div>
+      </div>
+
+      <div class="lesson-help" role="note">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        Ao marcar uma aula com anteriores pendentes, o painel pergunta se você quer concluir toda a sequência até ela.
+      </div>
+
+      <div id="coursesList" class="courses-list"></div>
+      <div id="emptyCourses" class="empty-state" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg>
+        <h2>Nenhuma disciplina encontrada</h2>
+        <p>Altere a busca ou o filtro de dia.</p>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="confirmDialog" class="dialog" aria-labelledby="dialogTitle" aria-describedby="dialogDescription">
+    <form method="dialog" class="dialog__content">
+      <div class="dialog__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 3 2.8 19h18.4L12 3Zm0 6v4m0 3h.01"/></svg>
+      </div>
+      <div class="dialog__copy">
+        <h2 id="dialogTitle">Confirmar ação</h2>
+        <p id="dialogDescription">Deseja continuar?</p>
+      </div>
+      <div class="dialog__actions" id="dialogActions"></div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+
+  <input id="sheetFileInput" type="file" accept=".xlsx,.xls,.xlsm" hidden>
+  <input id="backupFileInput" type="file" accept="application/json,.json" hidden>
+
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
   <script src="app.js"></script>
-
 </body>
-
 </html>
