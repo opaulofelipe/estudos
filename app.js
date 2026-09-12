@@ -5,7 +5,8 @@
   const STORAGE = {
     progress: "painel-estudos:progress:v1",
     catalog: "painel-estudos:catalog:v1",
-    meta: "painel-estudos:meta:v1"
+    meta: "painel-estudos:meta:v1",
+    colors: "painel-estudos:course-colors:v1"
   };
 
   const DAY_NAMES = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
@@ -40,7 +41,6 @@
     todayCountBadge: $("#todayCountBadge"),
     todayCourses: $("#todayCourses"),
     courseProgressList: $("#courseProgressList"),
-    weekSchedule: $("#weekSchedule"),
     lastSyncText: $("#lastSyncText"),
     importSheetButton: $("#importSheetButton"),
     exportBackupButton: $("#exportBackupButton"),
@@ -64,6 +64,7 @@
     courses: [],
     progress: loadJSON(STORAGE.progress, {}),
     meta: loadJSON(STORAGE.meta, {}),
+    courseColors: loadJSON(STORAGE.colors, { map: {}, nextIndex: 0 }),
     search: "",
     day: "all",
     activeTab: "overview",
@@ -117,6 +118,56 @@
       showToast("Não foi possível salvar dados neste navegador.", true);
       return false;
     }
+  }
+
+  function normalizeColorStore() {
+    if (!state.courseColors || typeof state.courseColors !== "object") {
+      state.courseColors = { map: {}, nextIndex: 0 };
+    }
+    if (!state.courseColors.map || typeof state.courseColors.map !== "object" || Array.isArray(state.courseColors.map)) {
+      state.courseColors.map = {};
+    }
+    if (!Number.isInteger(state.courseColors.nextIndex) || state.courseColors.nextIndex < 0) {
+      state.courseColors.nextIndex = Object.keys(state.courseColors.map).length;
+    }
+  }
+
+  function makePastelColor(index) {
+    // Golden-angle spacing keeps newly added disciplines visually distinct.
+    // The persistent index means removed disciplines never free a colour for reuse.
+    const hue = (18 + index * 137.50776405) % 360;
+    const saturationSteps = [48, 54, 60, 45, 57, 51];
+    const lightnessSteps = [76, 80, 73, 83, 78, 75];
+    const saturation = saturationSteps[index % saturationSteps.length];
+    const lightness = lightnessSteps[Math.floor(index / saturationSteps.length) % lightnessSteps.length];
+    return `hsl(${hue.toFixed(3)} ${saturation}% ${lightness}%)`;
+  }
+
+  function ensureCourseColors(courses = state.courses) {
+    normalizeColorStore();
+    const used = new Set(Object.values(state.courseColors.map));
+    let changed = false;
+
+    courses.forEach(course => {
+      if (state.courseColors.map[course.id]) return;
+
+      let candidate;
+      do {
+        candidate = makePastelColor(state.courseColors.nextIndex);
+        state.courseColors.nextIndex += 1;
+      } while (used.has(candidate));
+
+      state.courseColors.map[course.id] = candidate;
+      used.add(candidate);
+      changed = true;
+    });
+
+    if (changed) saveJSON(STORAGE.colors, state.courseColors);
+  }
+
+  function courseColor(course) {
+    ensureCourseColors([course]);
+    return state.courseColors.map[course.id];
   }
 
   function parseDays(value) {
@@ -360,9 +411,9 @@
     els.metricLessons.textContent = stats.total.toLocaleString("pt-BR");
     els.metricCompleted.textContent = stats.completed.toLocaleString("pt-BR");
 
+    ensureCourseColors();
     renderTodayCourses();
     renderCourseProgress();
-    renderWeekSchedule();
   }
 
   function renderTodayCourses() {
@@ -378,8 +429,9 @@
     els.todayCourses.innerHTML = courses.map((course, index) => {
       const stats = getCourseStats(course);
       const next = getNextLesson(course);
+      const color = courseColor(course);
       return `
-        <article class="today-card card">
+        <article class="today-card card" style="--course-color:${color}">
           <div class="today-card__top">
             <span class="today-card__index" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
             <div>
@@ -387,9 +439,16 @@
               <p>${escapeHTML(course.institution)}</p>
             </div>
           </div>
-          <div class="progress-track" aria-label="${stats.percent}% concluído"><div class="progress-fill" style="width:${stats.percent}%"></div></div>
+          <div class="today-card__progress">
+            <div class="course-donut course-donut--small" style="--p:${stats.percent}" role="img" aria-label="${stats.percent}% concluído em ${escapeHTML(course.discipline)}">
+              <div class="course-donut__inner"><strong>${stats.percent}%</strong></div>
+            </div>
+            <div class="today-card__stats">
+              <span>${stats.completed} de ${stats.total} aulas concluídas</span>
+              <span class="today-next">${next ? `Próxima: <strong>aula ${next}</strong>` : `<strong>Concluída</strong>`}</span>
+            </div>
+          </div>
           <div class="today-card__bottom">
-            <span class="today-next">${next ? `Próxima: <strong>aula ${next}</strong>` : `<strong>Concluída</strong>`}</span>
             <button class="btn btn--ghost btn--small" type="button" data-open-course="${escapeHTML(course.id)}">Abrir aulas</button>
           </div>
         </article>`;
@@ -399,29 +458,22 @@
   function renderCourseProgress() {
     els.courseProgressList.innerHTML = state.courses.map(course => {
       const stats = getCourseStats(course);
+      const color = courseColor(course);
       return `
-        <div class="course-progress-item">
-          <div class="course-progress-item__top">
-            <h3>${escapeHTML(course.discipline)}</h3>
-            <span>${stats.completed}/${stats.total} · ${stats.percent}%</span>
+        <article class="course-progress-item" style="--course-color:${color}">
+          <div class="course-donut" style="--p:${stats.percent}" role="img" aria-label="${stats.percent}% concluído em ${escapeHTML(course.discipline)}">
+            <div class="course-donut__inner">
+              <strong>${stats.percent}%</strong>
+              <span>${stats.completed}/${stats.total}</span>
+            </div>
           </div>
-          <div class="progress-track" aria-hidden="true"><div class="progress-fill" style="width:${stats.percent}%"></div></div>
-        </div>`;
-    }).join("");
-  }
-
-  function renderWeekSchedule() {
-    const today = new Date().getDay();
-    const orderedDays = [1, 2, 3, 4, 5, 6, 0];
-    els.weekSchedule.innerHTML = orderedDays.map(day => {
-      const courses = state.courses.filter(course => course.days.includes(day));
-      const names = courses.map(course => course.discipline).join(" · ") || "Sem matérias";
-      return `
-        <div class="week-row ${day === today ? "is-today" : ""}">
-          <span class="week-row__day">${DAY_NAMES[day]}</span>
-          <span class="week-row__names" title="${escapeHTML(names)}">${escapeHTML(names)}</span>
-          <span class="week-row__count">${courses.length}</span>
-        </div>`;
+          <div class="course-progress-item__copy">
+            <span class="course-progress-item__swatch" aria-hidden="true"></span>
+            <h3>${escapeHTML(course.discipline)}</h3>
+            <p>${escapeHTML(course.institution)} · ${escapeHTML(course.dayLabel)}</p>
+            <span class="course-progress-item__status">${stats.completed} de ${stats.total} aulas concluídas</span>
+          </div>
+        </article>`;
     }).join("");
   }
 
@@ -454,8 +506,9 @@
           data-course-id="${escapeHTML(course.id)}"
           data-lesson="${n}">${n}</button>`).join("");
 
+      const color = courseColor(course);
       return `
-        <details class="course-card" data-course-id="${escapeHTML(course.id)}" ${openIds.has(course.id) ? "open" : ""}>
+        <details class="course-card" style="--course-color:${color}" data-course-id="${escapeHTML(course.id)}" ${openIds.has(course.id) ? "open" : ""}>
           <summary>
             <div class="course-summary-main">
               <span class="course-chevron" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></span>
@@ -471,9 +524,13 @@
               </div>
             </div>
             <div class="course-summary-progress" aria-label="${stats.percent}% concluído">
-              <div class="progress-track"><div class="progress-fill" style="width:${stats.percent}%"></div></div>
-              <strong>${stats.percent}%</strong>
-              <span>${stats.completed} de ${stats.total} concluídas</span>
+              <div class="course-donut course-donut--summary" style="--p:${stats.percent}" role="img" aria-label="${stats.percent}% concluído em ${escapeHTML(course.discipline)}">
+                <div class="course-donut__inner"><strong>${stats.percent}%</strong></div>
+              </div>
+              <div class="course-summary-progress__copy">
+                <strong>${stats.completed} de ${stats.total}</strong>
+                <span>aulas concluídas</span>
+              </div>
             </div>
           </summary>
           <div class="course-body">
