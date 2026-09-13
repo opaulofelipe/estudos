@@ -368,8 +368,15 @@
   }
 
   function showContent() {
+    // Some mobile browsers can keep the loading panel visible when an
+    // author CSS rule sets display:flex. Hide it explicitly as well as
+    // using the semantic hidden attribute.
     els.overviewLoading.hidden = true;
+    els.overviewLoading.setAttribute("aria-hidden", "true");
+    els.overviewLoading.style.display = "none";
+
     els.overviewContent.hidden = false;
+    els.overviewContent.removeAttribute("aria-hidden");
   }
 
   function setSyncState(type, message) {
@@ -898,6 +905,11 @@
 
     const success = await fetchSpreadsheet({ announce: false });
     if (!success && !state.courses.length) {
+      // In the real error state the loading area is reused to show the
+      // message, so make sure it is visible again.
+      els.overviewLoading.hidden = false;
+      els.overviewLoading.removeAttribute("aria-hidden");
+      els.overviewLoading.style.removeProperty("display");
       els.overviewLoading.innerHTML = `
         <div class="empty-today card" style="max-width:640px">
           <strong>Não foi possível carregar Estudos.xlsx.</strong><br>
