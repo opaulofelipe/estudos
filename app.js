@@ -468,10 +468,12 @@
       const color = courseColor(course);
       return `
         <article class="course-progress-item" style="--course-color:${color}">
-          <div class="course-donut" style="--p:${stats.percent}" role="img" aria-label="${stats.percent}% concluído em ${escapeHTML(course.discipline)}">
-            <div class="course-donut__inner">
-              <strong>${stats.percent}%</strong>
-              <span>${stats.completed}/${stats.total}</span>
+          <div class="course-progress-item__chart">
+            <div class="course-donut" style="--p:${stats.percent}" role="img" aria-label="${stats.percent}% concluído em ${escapeHTML(course.discipline)}">
+              <div class="course-donut__inner">
+                <strong>${stats.percent}%</strong>
+                <span>${stats.completed}/${stats.total}</span>
+              </div>
             </div>
           </div>
           <div class="course-progress-item__copy">
