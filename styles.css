@@ -416,7 +416,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
   .metric { min-height: 130px; }
   .today-courses { grid-template-columns: repeat(2, minmax(0,1fr)); }
   .overview-columns { grid-template-columns: 1fr; }
-  .course-progress-list { grid-template-columns: 1fr; }
+  .course-progress-list { grid-template-columns: repeat(2, minmax(0,1fr)); }
   .side-stack { grid-template-columns: 1fr; margin-top: 0; }
 }
 
@@ -437,7 +437,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
   .progress-hero { min-height: 160px; padding: 22px; }
   .progress-ring { width: 106px; height: 106px; flex-basis: 106px; }
   .today-courses { grid-template-columns: 1fr; }
-  .course-progress-list { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .course-progress-list { grid-template-columns: 1fr; }
   .lessons-toolbar { align-items: stretch; flex-direction: column; }
   .toolbar-main, .toolbar-actions { width: 100%; }
   .toolbar-actions .btn { flex: 1; }
