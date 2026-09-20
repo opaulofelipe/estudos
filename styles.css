@@ -229,30 +229,53 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .empty-today strong { color: var(--slate-900); }
 
 .overview-columns { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 320px); gap: 24px; align-items: start; }
-.course-progress-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.course-progress-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
 .course-progress-item {
   min-width: 0;
-  min-height: 132px;
-  padding: 16px;
-  display: grid;
-  grid-template-columns: 86px minmax(0, 1fr);
-  align-items: center;
-  gap: 14px;
+  min-height: 258px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
   background: var(--white);
   border: 1px solid var(--line);
-  border-radius: 14px;
-  box-shadow: 0 1px 2px rgba(47,62,70,.04);
+  border-top: 4px solid var(--course-color, var(--sage-300));
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm);
 }
-.course-progress-item__copy { min-width: 0; }
-.course-progress-item__swatch { display: block; width: 22px; height: 4px; margin-bottom: 8px; border-radius: 999px; background: var(--course-color); }
-.course-progress-item h3 { margin: 0; font-size: .92rem; line-height: 1.25; color: var(--slate-900); }
-.course-progress-item p { margin: 5px 0 8px; color: var(--muted); font-size: .72rem; line-height: 1.35; }
-.course-progress-item__status { color: var(--muted); font-size: .74rem; }
+.course-progress-item__chart {
+  width: 100%;
+  min-height: 136px;
+  padding: 2px 0 16px;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid var(--line);
+}
+.course-progress-item__copy { min-width: 0; width: 100%; }
+.course-progress-item__swatch { display: block; width: 28px; height: 5px; margin-bottom: 10px; border-radius: 999px; background: var(--course-color); }
+.course-progress-item h3 { margin: 0; font-size: 1rem; line-height: 1.3; color: var(--slate-900); }
+.course-progress-item p { margin: 6px 0 10px; color: var(--muted); font-size: .76rem; line-height: 1.4; }
+.course-progress-item__status {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: .74rem;
+  line-height: 1.25;
+}
 .course-donut {
   --p: 0;
-  width: 82px;
-  height: 82px;
-  flex: 0 0 82px;
+  width: 112px;
+  height: 112px;
+  flex: 0 0 112px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -393,7 +416,7 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
   .metric { min-height: 130px; }
   .today-courses { grid-template-columns: repeat(2, minmax(0,1fr)); }
   .overview-columns { grid-template-columns: 1fr; }
-  .course-progress-list { grid-template-columns: repeat(3, minmax(0,1fr)); }
+  .course-progress-list { grid-template-columns: 1fr; }
   .side-stack { grid-template-columns: 1fr; margin-top: 0; }
 }
 
@@ -430,7 +453,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
   .metric strong { font-size: 1.55rem; }
   .section-block { margin-top: 26px; }
   .course-progress-list { grid-template-columns: 1fr; }
-  .course-progress-item { min-height: 118px; }
+  .course-progress-item { min-height: 0; padding: 18px; }
+  .course-progress-item__chart { min-height: 128px; }
   .side-stack { grid-template-columns: 1fr; }
   .toolbar-main { flex-direction: column; }
   .select-field select { width: 100%; }
