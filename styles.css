@@ -1895,3 +1895,78 @@ summary:focus-visible,
     margin-top: 0;
   }
 }
+
+
+/* Composição do painel: Agenda + Progresso alinhados, Foco + Ritmo sem vazios. */
+.command-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(310px, .72fr);
+  justify-content: stretch;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.command-grid .today-panel,
+.command-grid .overview-score {
+  min-height: 390px;
+  height: 100%;
+}
+
+.command-grid .overview-score {
+  width: auto;
+}
+
+.support-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+}
+
+.support-grid .focus-card,
+.support-grid .week-card {
+  min-height: 240px;
+  height: 100%;
+}
+
+.support-grid .focus-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.support-grid .focus-actions {
+  margin-top: auto;
+}
+
+.support-grid .week-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+@media (max-width: 1040px) {
+  .command-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .command-grid .today-panel,
+  .command-grid .overview-score {
+    min-height: auto;
+  }
+
+  .support-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .support-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .support-grid .focus-card,
+  .support-grid .week-card {
+    min-height: auto;
+  }
+}
