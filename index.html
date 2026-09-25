@@ -8,7 +8,7 @@
   <meta name="description" content="Painel pessoal para organizar aulas, rotina semanal e progresso de estudos.">
   <title>Estudos — Central de foco</title>
   <link rel="preconnect" href="https://cdn.sheetjs.com">
-  <link rel="stylesheet" href="styles.css?v=5">
+  <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
@@ -67,30 +67,6 @@
         </header>
 
         <section class="command-grid" aria-label="Resumo e próxima ação">
-          <article class="continue-card">
-            <div class="continue-card__noise" aria-hidden="true"></div>
-            <div class="continue-card__head">
-              <span class="eyebrow eyebrow--light">CONTINUE DE ONDE PAROU</span>
-              <span class="continue-card__badge">PRÓXIMA AÇÃO</span>
-            </div>
-            <div class="continue-card__body">
-              <p class="continue-card__label">Agora</p>
-              <h2 id="continueCourse">Carregando disciplina…</h2>
-              <p id="continueMeta">Preparando sua próxima aula.</p>
-            </div>
-            <div class="continue-card__progress">
-              <div class="progress-track progress-track--dark"><span id="continueBar"></span></div>
-              <div class="continue-card__progress-copy">
-                <span id="continuePercent">0% concluído</span>
-                <span id="globalProgressText">0 de 0 aulas no total</span>
-              </div>
-            </div>
-            <div class="continue-card__actions">
-              <button class="btn btn--paper" id="continueOpenButton" type="button">Abrir disciplina</button>
-              <button class="btn btn--accent" id="continueCompleteButton" type="button">Concluir próxima aula</button>
-            </div>
-          </article>
-
           <aside class="overview-score" aria-label="Panorama geral">
             <div class="score-main">
               <span class="eyebrow">PROGRESSO GERAL</span>
@@ -156,13 +132,6 @@
         </section>
 
         <section class="progress-section">
-          <div class="panel-heading progress-section__heading">
-            <div>
-              <span class="eyebrow">MAPA DE PROGRESSO</span>
-              <h2>Onde sua atenção é mais necessária</h2>
-            </div>
-            <p>Disciplinas menos avançadas aparecem primeiro.</p>
-          </div>
           <div id="courseProgressList" class="progress-list"></div>
         </section>
 
@@ -289,7 +258,7 @@
   ]
 }
   </script>
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=13"></script>
 
 </body>
 </html>
