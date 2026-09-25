@@ -37,12 +37,6 @@
     metricCourses: $("#metricCourses"),
     metricRemaining: $("#metricRemaining"),
     metricCompleted: $("#metricCompleted"),
-    continueCourse: $("#continueCourse"),
-    continueMeta: $("#continueMeta"),
-    continueBar: $("#continueBar"),
-    continuePercent: $("#continuePercent"),
-    continueOpenButton: $("#continueOpenButton"),
-    continueCompleteButton: $("#continueCompleteButton"),
     todayCountBadge: $("#todayCountBadge"),
     todayCourses: $("#todayCourses"),
     weekStrip: $("#weekStrip"),
@@ -545,7 +539,7 @@
     els.metricCompleted.textContent = stats.completed.toLocaleString("pt-BR");
 
     ensureCourseColors();
-    renderContinueCourse();
+    state.priorityCourseId = getPriorityCourse()?.id || null;
     renderTodayCourses();
     renderWeekStrip();
     renderCourseProgress();
@@ -553,36 +547,11 @@
     renderTimer();
   }
 
-  function renderContinueCourse() {
-    const course = getPriorityCourse();
-    state.priorityCourseId = course?.id || null;
-
-    if (!course) {
-      els.continueCourse.textContent = state.courses.length ? "Tudo concluído." : "Nenhuma disciplina disponível.";
-      els.continueMeta.textContent = state.courses.length
-        ? "Seu catálogo está 100% concluído. Um raro momento em que um dashboard pode ficar sem cobrar nada de você."
-        : "Sincronize ou importe sua planilha para começar.";
-      els.continueBar.style.width = state.courses.length ? "100%" : "0%";
-      els.continuePercent.textContent = state.courses.length ? "100% concluído" : "Sem progresso ainda";
-      els.continueOpenButton.disabled = true;
-      els.continueCompleteButton.disabled = true;
-      return;
-    }
-
-    const stats = getCourseStats(course);
-    const next = getNextLesson(course);
-    els.continueCourse.textContent = course.discipline;
-    els.continueMeta.textContent = `${course.institution} · próxima: aula ${next} de ${course.totalLessons}`;
-    els.continueBar.style.width = `${stats.percent}%`;
-    els.continuePercent.textContent = `${stats.percent}% concluído · ${stats.completed}/${stats.total} aulas`;
-    els.continueOpenButton.disabled = false;
-    els.continueCompleteButton.disabled = false;
-    els.continueCompleteButton.textContent = `Concluir aula ${next}`;
-  }
-
   function renderTodayCourses() {
     const today = new Date().getDay();
-    const courses = state.courses.filter(course => course.days.includes(today));
+    const courses = state.courses
+      .filter(course => course.days.includes(today))
+      .sort((a, b) => a.discipline.localeCompare(b.discipline, "pt-BR", { sensitivity: "base" }));
     els.todayCountBadge.textContent = `${courses.length} ${courses.length === 1 ? "matéria" : "matérias"}`;
 
     if (!courses.length) {
@@ -644,13 +613,9 @@
   }
 
   function renderCourseProgress() {
-    const ordered = [...state.courses].sort((a, b) => {
-      const aStats = getCourseStats(a);
-      const bStats = getCourseStats(b);
-      if (aStats.percent === 100 && bStats.percent !== 100) return 1;
-      if (bStats.percent === 100 && aStats.percent !== 100) return -1;
-      return aStats.percent - bStats.percent || a.discipline.localeCompare(b.discipline, "pt-BR");
-    });
+    const ordered = [...state.courses].sort((a, b) =>
+      a.discipline.localeCompare(b.discipline, "pt-BR", { sensitivity: "base" })
+    );
 
     els.courseProgressList.innerHTML = ordered.map(course => {
       const stats = getCourseStats(course);
@@ -658,19 +623,18 @@
       const statusClass = stats.percent === 100 ? "is-done" : stats.percent > 0 ? "is-started" : "";
       const statusLabel = stats.percent === 100 ? "Concluída" : stats.percent > 0 ? "Em andamento" : "Não iniciada";
       return `
-        <article class="progress-row" style="--course-color:${color}">
-          <div class="progress-row__identity">
-            <span class="progress-row__swatch" aria-hidden="true"></span>
-            <div>
-              <h3>${escapeHTML(course.discipline)}</h3>
-              <p>${escapeHTML(course.institution)} · ${escapeHTML(course.dayLabel)}</p>
+        <article class="progress-card" style="--course-color:${color}">
+          <div class="progress-card__donut" style="--p:${stats.percent}" role="img" aria-label="${stats.percent}% de ${escapeHTML(course.discipline)} concluído">
+            <div class="progress-card__donut-inner">
+              <strong>${stats.percent}%</strong>
+              <span>${stats.completed}/${stats.total}</span>
             </div>
           </div>
-          <div class="progress-row__bar">
-            <div class="progress-track" aria-label="${stats.percent}% concluído"><span style="width:${stats.percent}%;background:${color}"></span></div>
+          <div class="progress-card__copy">
+            <h3>${escapeHTML(course.discipline)}</h3>
+            <p>${escapeHTML(course.institution)} · ${escapeHTML(course.dayLabel)}</p>
           </div>
-          <div class="progress-row__value">${stats.percent}%</div>
-          <span class="progress-row__status ${statusClass}">${statusLabel}</span>
+          <span class="progress-card__status ${statusClass}">${statusLabel}</span>
         </article>`;
     }).join("");
   }
@@ -743,7 +707,7 @@
       const haystack = normalizeText(`${course.discipline} ${course.institution} ${course.dayLabel}`);
       const matchSearch = !query || haystack.includes(query);
       return matchDay && matchSearch;
-    });
+    }).sort((a, b) => a.discipline.localeCompare(b.discipline, "pt-BR", { sensitivity: "base" }));
   }
 
   function renderCourses(openIds = new Set()) {
@@ -1093,16 +1057,6 @@
     els.backupFileInput.addEventListener("change", () => {
       const [file] = els.backupFileInput.files;
       if (file) importBackup(file);
-    });
-
-    els.continueOpenButton.addEventListener("click", () => {
-      const course = state.courses.find(item => item.id === state.priorityCourseId);
-      if (course) openCourse(course.id);
-    });
-
-    els.continueCompleteButton.addEventListener("click", () => {
-      const course = state.courses.find(item => item.id === state.priorityCourseId);
-      if (course) completeNextLesson(course);
     });
 
     els.focusStartButton.addEventListener("click", toggleFocusTimer);
