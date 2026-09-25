@@ -166,20 +166,17 @@
 
   function ensureCourseColors(courses = state.courses) {
     normalizeColorStore();
-    const used = new Set(Object.values(state.courseColors.map));
     let changed = false;
 
     courses.forEach(course => {
       if (state.courseColors.map[course.id]) return;
 
-      let candidate;
-      do {
-        candidate = makePastelColor(state.courseColors.nextIndex);
-        state.courseColors.nextIndex += 1;
-      } while (used.has(candidate));
+      // The palette is finite: reuse colors after one full cycle instead
+      // of searching forever for an unused color when there are 13+ courses.
+      const candidate = makePastelColor(state.courseColors.nextIndex);
+      state.courseColors.nextIndex += 1;
 
       state.courseColors.map[course.id] = candidate;
-      used.add(candidate);
       changed = true;
     });
 
