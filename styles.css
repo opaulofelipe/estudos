@@ -1032,6 +1032,25 @@ svg {
   border-color: var(--ink);
 }
 
+/* Compatibilidade com ações e diálogos existentes no JavaScript. */
+.btn--secondary {
+  background: var(--ink);
+  color: #fff;
+}
+
+.btn--secondary:hover { background: #2a2924; }
+
+.btn--ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line-dark);
+}
+
+.btn--ghost:hover {
+  background: rgba(255,255,255,.55);
+  border-color: var(--ink);
+}
+
 .btn--danger {
   background: var(--red-soft);
   color: #863333;
