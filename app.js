@@ -6,7 +6,7 @@
     progress: "painel-estudos:progress:v1",
     catalog: "painel-estudos:catalog:v1",
     meta: "painel-estudos:meta:v1",
-    colors: "painel-estudos:course-colors:v1"
+    colors: "painel-estudos:course-colors:v2"
   };
 
   const DAY_NAMES = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
@@ -33,13 +33,22 @@
     overviewContent: $("#overviewContent"),
     globalProgressLabel: $("#globalProgressLabel"),
     globalProgressText: $("#globalProgressText"),
-    globalProgressRing: $("#globalProgressRing"),
-    globalProgressRingText: $("#globalProgressRingText"),
     metricCourses: $("#metricCourses"),
-    metricLessons: $("#metricLessons"),
+    metricRemaining: $("#metricRemaining"),
     metricCompleted: $("#metricCompleted"),
+    continueCourse: $("#continueCourse"),
+    continueMeta: $("#continueMeta"),
+    continueBar: $("#continueBar"),
+    continuePercent: $("#continuePercent"),
+    continueOpenButton: $("#continueOpenButton"),
+    continueCompleteButton: $("#continueCompleteButton"),
     todayCountBadge: $("#todayCountBadge"),
     todayCourses: $("#todayCourses"),
+    weekStrip: $("#weekStrip"),
+    focusCourse: $("#focusCourse"),
+    focusTimer: $("#focusTimer"),
+    focusStartButton: $("#focusStartButton"),
+    focusResetButton: $("#focusResetButton"),
     courseProgressList: $("#courseProgressList"),
     lastSyncText: $("#lastSyncText"),
     importSheetButton: $("#importSheetButton"),
@@ -68,6 +77,10 @@
     search: "",
     day: "all",
     activeTab: "overview",
+    priorityCourseId: null,
+    timerSeconds: 25 * 60,
+    timerRunning: false,
+    timerInterval: null,
     toastTimer: null,
     dialogResolve: null,
     dialogCancelHandler: null,
@@ -133,14 +146,21 @@
   }
 
   function makePastelColor(index) {
-    // Golden-angle spacing keeps newly added disciplines visually distinct.
-    // The persistent index means removed disciplines never free a colour for reuse.
-    const hue = (18 + index * 137.50776405) % 360;
-    const saturationSteps = [48, 54, 60, 45, 57, 51];
-    const lightnessSteps = [76, 80, 73, 83, 78, 75];
-    const saturation = saturationSteps[index % saturationSteps.length];
-    const lightness = lightnessSteps[Math.floor(index / saturationSteps.length) % lightnessSteps.length];
-    return `hsl(${hue.toFixed(3)} ${saturation}% ${lightness}%)`;
+    const palette = [
+      "#f3b5a5",
+      "#b8c6ff",
+      "#b7d6c2",
+      "#efd18b",
+      "#c9b8e8",
+      "#a8d5df",
+      "#efb9cf",
+      "#c5d99c",
+      "#e7b99c",
+      "#b9c8d7",
+      "#dac5a6",
+      "#b9d7d0"
+    ];
+    return palette[index % palette.length];
   }
 
   function ensureCourseColors(courses = state.courses) {
@@ -407,20 +427,58 @@
       : "Nenhuma matéria programada";
   }
 
+  function getPriorityCourse() {
+    const today = new Date().getDay();
+    const incomplete = state.courses.filter(course => getNextLesson(course) !== null);
+    const byNeed = (a, b) => getCourseStats(a).percent - getCourseStats(b).percent;
+    const todayIncomplete = incomplete.filter(course => course.days.includes(today)).sort(byNeed);
+    return todayIncomplete[0] || incomplete.sort(byNeed)[0] || null;
+  }
+
   function renderOverview() {
     const stats = getGlobalStats();
+    const remaining = Math.max(0, stats.total - stats.completed);
+
     els.globalProgressLabel.textContent = `${stats.percent}%`;
-    els.globalProgressText.textContent = `${stats.completed.toLocaleString("pt-BR")} de ${stats.total.toLocaleString("pt-BR")} aulas concluídas`;
-    els.globalProgressRing.style.setProperty("--p", stats.percent);
-    els.globalProgressRing.setAttribute("aria-label", `Progresso geral de ${stats.percent}%`);
-    els.globalProgressRingText.textContent = `${stats.percent}%`;
+    els.globalProgressText.textContent = `${stats.completed.toLocaleString("pt-BR")} de ${stats.total.toLocaleString("pt-BR")} aulas no total`;
     els.metricCourses.textContent = state.courses.length.toLocaleString("pt-BR");
-    els.metricLessons.textContent = stats.total.toLocaleString("pt-BR");
+    els.metricRemaining.textContent = remaining.toLocaleString("pt-BR");
     els.metricCompleted.textContent = stats.completed.toLocaleString("pt-BR");
 
     ensureCourseColors();
+    renderContinueCourse();
     renderTodayCourses();
+    renderWeekStrip();
     renderCourseProgress();
+    renderFocusContext();
+    renderTimer();
+  }
+
+  function renderContinueCourse() {
+    const course = getPriorityCourse();
+    state.priorityCourseId = course?.id || null;
+
+    if (!course) {
+      els.continueCourse.textContent = state.courses.length ? "Tudo concluído." : "Nenhuma disciplina disponível.";
+      els.continueMeta.textContent = state.courses.length
+        ? "Seu catálogo está 100% concluído. Um raro momento em que um dashboard pode ficar sem cobrar nada de você."
+        : "Sincronize ou importe sua planilha para começar.";
+      els.continueBar.style.width = state.courses.length ? "100%" : "0%";
+      els.continuePercent.textContent = state.courses.length ? "100% concluído" : "Sem progresso ainda";
+      els.continueOpenButton.disabled = true;
+      els.continueCompleteButton.disabled = true;
+      return;
+    }
+
+    const stats = getCourseStats(course);
+    const next = getNextLesson(course);
+    els.continueCourse.textContent = course.discipline;
+    els.continueMeta.textContent = `${course.institution} · próxima: aula ${next} de ${course.totalLessons}`;
+    els.continueBar.style.width = `${stats.percent}%`;
+    els.continuePercent.textContent = `${stats.percent}% concluído · ${stats.completed}/${stats.total} aulas`;
+    els.continueOpenButton.disabled = false;
+    els.continueCompleteButton.disabled = false;
+    els.continueCompleteButton.textContent = `Concluir aula ${next}`;
   }
 
   function renderTodayCourses() {
@@ -429,7 +487,14 @@
     els.todayCountBadge.textContent = `${courses.length} ${courses.length === 1 ? "matéria" : "matérias"}`;
 
     if (!courses.length) {
-      els.todayCourses.innerHTML = `<div class="empty-today card"><strong>Dia livre na planilha.</strong><br>Use o tempo para revisão, descanso ou adiantamento.</div>`;
+      els.todayCourses.innerHTML = `
+        <div class="empty-today">
+          <span class="empty-today__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>
+          </span>
+          <strong>Nada programado para hoje.</strong>
+          <p>Você pode revisar uma disciplina ou, radicalmente, descansar.</p>
+        </div>`;
       return;
     }
 
@@ -437,53 +502,139 @@
       const stats = getCourseStats(course);
       const next = getNextLesson(course);
       const color = courseColor(course);
+      const complete = next === null;
       return `
-        <article class="today-card card" style="--course-color:${color}">
-          <div class="today-card__top">
-            <span class="today-card__index" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
-            <div>
-              <h3>${escapeHTML(course.discipline)}</h3>
-              <p>${escapeHTML(course.institution)}</p>
-            </div>
+        <article class="today-item ${complete ? "is-complete" : ""}" style="--course-color:${color}">
+          <span class="today-item__index" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
+          <div class="today-item__copy">
+            <h3>${escapeHTML(course.discipline)}</h3>
+            <p>${escapeHTML(course.institution)} · ${complete ? "disciplina concluída" : `próxima: aula ${next}`}</p>
           </div>
-          <div class="today-card__progress">
-            <div class="course-donut course-donut--small" style="--p:${stats.percent}" role="img" aria-label="${stats.percent}% concluído em ${escapeHTML(course.discipline)}">
-              <div class="course-donut__inner"><strong>${stats.percent}%</strong></div>
+          <div class="today-item__progress">
+            <div class="today-item__progress-row">
+              <span>${stats.completed}/${stats.total} aulas</span>
+              <strong>${stats.percent}%</strong>
             </div>
-            <div class="today-card__stats">
-              <span>${stats.completed} de ${stats.total} aulas concluídas</span>
-              <span class="today-next">${next ? `Próxima: <strong>aula ${next}</strong>` : `<strong>Concluída</strong>`}</span>
-            </div>
+            <div class="progress-track" aria-label="${stats.percent}% concluído"><span style="width:${stats.percent}%;background:${color}"></span></div>
           </div>
-          <div class="today-card__bottom">
-            <button class="btn btn--ghost btn--small" type="button" data-open-course="${escapeHTML(course.id)}">Abrir aulas</button>
+          <div class="today-item__actions">
+            <button class="mini-action" type="button" data-open-course="${escapeHTML(course.id)}" aria-label="Abrir ${escapeHTML(course.discipline)}" title="Abrir disciplina">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+            </button>
+            <button class="mini-action mini-action--complete" type="button" data-complete-next="${escapeHTML(course.id)}" aria-label="${complete ? "Disciplina concluída" : `Concluir aula ${next} de ${escapeHTML(course.discipline)}`}" title="${complete ? "Concluída" : `Concluir aula ${next}`}" ${complete ? "disabled" : ""}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
+            </button>
           </div>
         </article>`;
     }).join("");
   }
 
+  function renderWeekStrip() {
+    const shortNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    const today = new Date().getDay();
+
+    els.weekStrip.innerHTML = DAY_NAMES.map((_, day) => {
+      const count = state.courses.filter(course => course.days.includes(day)).length;
+      return `
+        <div class="week-day ${day === today ? "is-today" : ""}" title="${DAY_NAMES[day]}: ${count} ${count === 1 ? "matéria" : "matérias"}">
+          <span class="week-day__name">${shortNames[day]}</span>
+          <strong class="week-day__count">${count}</strong>
+          <small>${count === 1 ? "mat." : "mat."}</small>
+        </div>`;
+    }).join("");
+  }
+
   function renderCourseProgress() {
-    els.courseProgressList.innerHTML = state.courses.map(course => {
+    const ordered = [...state.courses].sort((a, b) => {
+      const aStats = getCourseStats(a);
+      const bStats = getCourseStats(b);
+      if (aStats.percent === 100 && bStats.percent !== 100) return 1;
+      if (bStats.percent === 100 && aStats.percent !== 100) return -1;
+      return aStats.percent - bStats.percent || a.discipline.localeCompare(b.discipline, "pt-BR");
+    });
+
+    els.courseProgressList.innerHTML = ordered.map(course => {
       const stats = getCourseStats(course);
       const color = courseColor(course);
+      const statusClass = stats.percent === 100 ? "is-done" : stats.percent > 0 ? "is-started" : "";
+      const statusLabel = stats.percent === 100 ? "Concluída" : stats.percent > 0 ? "Em andamento" : "Não iniciada";
       return `
-        <article class="course-progress-item" style="--course-color:${color}">
-          <div class="course-progress-item__chart">
-            <div class="course-donut" style="--p:${stats.percent}" role="img" aria-label="${stats.percent}% concluído em ${escapeHTML(course.discipline)}">
-              <div class="course-donut__inner">
-                <strong>${stats.percent}%</strong>
-                <span>${stats.completed}/${stats.total}</span>
-              </div>
+        <article class="progress-row" style="--course-color:${color}">
+          <div class="progress-row__identity">
+            <span class="progress-row__swatch" aria-hidden="true"></span>
+            <div>
+              <h3>${escapeHTML(course.discipline)}</h3>
+              <p>${escapeHTML(course.institution)} · ${escapeHTML(course.dayLabel)}</p>
             </div>
           </div>
-          <div class="course-progress-item__copy">
-            <span class="course-progress-item__swatch" aria-hidden="true"></span>
-            <h3>${escapeHTML(course.discipline)}</h3>
-            <p>${escapeHTML(course.institution)} · ${escapeHTML(course.dayLabel)}</p>
-            <span class="course-progress-item__status">${stats.completed} de ${stats.total} aulas concluídas</span>
+          <div class="progress-row__bar">
+            <div class="progress-track" aria-label="${stats.percent}% concluído"><span style="width:${stats.percent}%;background:${color}"></span></div>
           </div>
+          <div class="progress-row__value">${stats.percent}%</div>
+          <span class="progress-row__status ${statusClass}">${statusLabel}</span>
         </article>`;
     }).join("");
+  }
+
+  function renderFocusContext() {
+    const course = state.courses.find(item => item.id === state.priorityCourseId);
+    els.focusCourse.textContent = course
+      ? `Em foco: ${course.discipline}`
+      : "Sem disciplina pendente";
+  }
+
+  function formatTimer(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const rest = seconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
+  }
+
+  function renderTimer() {
+    els.focusTimer.textContent = formatTimer(state.timerSeconds);
+    els.focusStartButton.textContent = state.timerRunning ? "Pausar" : state.timerSeconds === 0 ? "Concluído" : "Iniciar";
+    els.focusStartButton.disabled = state.timerSeconds === 0;
+  }
+
+  function toggleFocusTimer() {
+    if (state.timerSeconds === 0) return;
+    state.timerRunning = !state.timerRunning;
+
+    if (state.timerRunning) {
+      state.timerInterval = setInterval(() => {
+        state.timerSeconds = Math.max(0, state.timerSeconds - 1);
+        if (state.timerSeconds === 0) {
+          clearInterval(state.timerInterval);
+          state.timerInterval = null;
+          state.timerRunning = false;
+          showToast("Sessão de foco concluída.");
+        }
+        renderTimer();
+      }, 1000);
+    } else if (state.timerInterval) {
+      clearInterval(state.timerInterval);
+      state.timerInterval = null;
+    }
+
+    renderTimer();
+  }
+
+  function resetFocusTimer() {
+    if (state.timerInterval) clearInterval(state.timerInterval);
+    state.timerInterval = null;
+    state.timerRunning = false;
+    state.timerSeconds = 25 * 60;
+    renderTimer();
+  }
+
+  function completeNextLesson(course) {
+    const next = getNextLesson(course);
+    if (next === null) {
+      showToast(`${course.discipline} já está concluída.`);
+      return;
+    }
+    addLessons(course, [next]);
+    renderAll();
+    showToast(`Aula ${next} de ${course.discipline} concluída.`);
   }
 
   function filteredCourses() {
@@ -844,6 +995,19 @@
       if (file) importBackup(file);
     });
 
+    els.continueOpenButton.addEventListener("click", () => {
+      const course = state.courses.find(item => item.id === state.priorityCourseId);
+      if (course) openCourse(course.id);
+    });
+
+    els.continueCompleteButton.addEventListener("click", () => {
+      const course = state.courses.find(item => item.id === state.priorityCourseId);
+      if (course) completeNextLesson(course);
+    });
+
+    els.focusStartButton.addEventListener("click", toggleFocusTimer);
+    els.focusResetButton.addEventListener("click", resetFocusTimer);
+
     els.courseSearch.addEventListener("input", event => {
       state.search = event.target.value;
       renderCourses();
@@ -872,8 +1036,17 @@
     });
 
     els.todayCourses.addEventListener("click", event => {
-      const button = event.target.closest("[data-open-course]");
-      if (button) openCourse(button.dataset.openCourse);
+      const openButton = event.target.closest("[data-open-course]");
+      if (openButton) {
+        openCourse(openButton.dataset.openCourse);
+        return;
+      }
+
+      const completeButton = event.target.closest("[data-complete-next]");
+      if (completeButton) {
+        const course = state.courses.find(item => item.id === completeButton.dataset.completeNext);
+        if (course) completeNextLesson(course);
+      }
     });
 
     const tabs = $$("[role='tab']");
