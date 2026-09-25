@@ -421,32 +421,41 @@
     });
   }
 
+  function readEmbeddedCatalog() {
+    const node = document.getElementById("embeddedCatalog");
+    if (!node) throw new Error("Catálogo embutido não encontrado.");
+    const raw = node.textContent.trim();
+    if (!raw) throw new Error("Catálogo embutido está vazio.");
+    return parseCatalogJSON(JSON.parse(raw));
+  }
+
   async function fetchSpreadsheet({ announce = true } = {}) {
-    setSyncState("syncing", "Sincronizando catálogo…");
+    setSyncState("syncing", "Carregando catálogo…");
     els.syncButton.disabled = true;
 
     try {
       let courses = [];
-      let usedXlsxFallback = false;
 
       try {
-        const response = await fetch(`${CATALOG_URL}?v=${Date.now()}`, { cache: "no-store" });
-        if (!response.ok) throw new Error(`Não consegui abrir ${CATALOG_URL} (${response.status}).`);
-        courses = parseCatalogJSON(await response.json());
-      } catch (catalogError) {
-        usedXlsxFallback = true;
-        await ensureXLSX();
-
-        const response = await fetch(`${SHEET_URL}?v=${Date.now()}`, { cache: "no-store" });
-        if (!response.ok) throw new Error(`Não consegui abrir ${SHEET_URL} (${response.status}).`);
-        const arrayBuffer = await response.arrayBuffer();
-        courses = parseWorkbook(arrayBuffer);
+        courses = readEmbeddedCatalog();
+      } catch (embeddedError) {
+        try {
+          const response = await fetch(`${CATALOG_URL}?v=${Date.now()}`, { cache: "no-store" });
+          if (!response.ok) throw new Error(`Não consegui abrir ${CATALOG_URL} (${response.status}).`);
+          courses = parseCatalogJSON(await response.json());
+        } catch (catalogError) {
+          await ensureXLSX();
+          const response = await fetch(`${SHEET_URL}?v=${Date.now()}`, { cache: "no-store" });
+          if (!response.ok) throw new Error(`Não consegui abrir ${SHEET_URL} (${response.status}).`);
+          const arrayBuffer = await response.arrayBuffer();
+          courses = parseWorkbook(arrayBuffer);
+        }
       }
 
       if (!courses.length) throw new Error("O catálogo não contém disciplinas válidas.");
 
-      applyCatalog(courses, usedXlsxFallback ? "github" : "catalog");
-      if (announce) showToast(`${courses.length} disciplinas sincronizadas. Seu progresso foi preservado.`);
+      applyCatalog(courses, "embedded");
+      if (announce) showToast(`${courses.length} disciplinas carregadas. Seu progresso foi preservado.`);
       return true;
     } catch (error) {
       const cached = loadJSON(STORAGE.catalog, []);
@@ -455,9 +464,9 @@
         renderAll();
         showContent();
         setSyncState("error", "Usando última cópia salva");
-        if (announce) showToast(`Falha ao sincronizar: ${error.message} Usando a última cópia salva.`, true);
+        if (announce) showToast(`Falha ao atualizar: ${error.message} Usando a última cópia salva.`, true);
       } else {
-        setSyncState("error", "Falha na sincronização");
+        setSyncState("error", "Falha ao carregar catálogo");
         if (announce) showToast(error.message, true);
       }
       return false;
@@ -809,7 +818,7 @@
       return;
     }
     const date = new Date(state.meta.lastSync);
-    const source = state.meta.source === "local" ? "arquivo local" : "Estudos.xlsx no site";
+    const source = state.meta.source === "local" ? "arquivo local" : state.meta.source === "embedded" ? "catálogo embutido" : state.meta.source === "catalog" ? "catálogo publicado" : "Estudos.xlsx no site";
     els.lastSyncText.textContent = `Última leitura: ${new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(date)} · ${source}.`;
   }
 
