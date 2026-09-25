@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "source": "Estudos.xlsx",
+  "courses": [
+    {"disciplina":"A Arte do Filme","aulasTotais":9,"dia":"Segunda","instituicao":"Pablo Villaça"},
+    {"disciplina":"História do Cinema","aulasTotais":56,"dia":"Terça","instituicao":"Pablo Villaça"},
+    {"disciplina":"Aspectos Técnicos do Cinema","aulasTotais":32,"dia":"Quarta","instituicao":"Artur Tuoto"},
+    {"disciplina":"História da Arte","aulasTotais":64,"dia":"Quinta","instituicao":"Programa História da Arte"},
+    {"disciplina":"História da Filosofia","aulasTotais":64,"dia":"Sexta","instituicao":"Casa do Saber"},
+    {"disciplina":"A História antes da Escrita","aulasTotais":16,"dia":"Sábado","instituicao":"Universidade de São Paulo"},
+    {"disciplina":"Teoria da História","aulasTotais":16,"dia":"Domingo","instituicao":"Universidade de São Paulo"},
+    {"disciplina":"Historiografia Brasileria","aulasTotais":16,"dia":"Segunda","instituicao":"Universidade de São Paulo"},
+    {"disciplina":"Antropologia","aulasTotais":16,"dia":"Terça","instituicao":"Casa do Saber"},
+    {"disciplina":"Italiano","aulasTotais":64,"dia":"Quarta","instituicao":"Rosetta Stone"},
+    {"disciplina":"Alemão","aulasTotais":64,"dia":"Quinta","instituicao":"Rosetta Stone"},
+    {"disciplina":"Francês","aulasTotais":64,"dia":"Sexta","instituicao":"Rosetta Stone"},
+    {"disciplina":"Português","aulasTotais":64,"dia":"Segunda","instituicao":"Estratégia Concursos"},
+    {"disciplina":"Matemática","aulasTotais":64,"dia":"Terça","instituicao":"Gran Concursos"},
+    {"disciplina":"Direito Administrativo","aulasTotais":64,"dia":"Quarta","instituicao":"Estratégia Concursos"},
+    {"disciplina":"Direito Constitucional","aulasTotais":64,"dia":"Quinta","instituicao":"Estratégia Concursos"},
+    {"disciplina":"Informática","aulasTotais":64,"dia":"Sexta","instituicao":"Estratégia Concursos"},
+    {"disciplina":"Geografia Brasileira","aulasTotais":64,"dia":"Sábado","instituicao":"GeoBrasil"},
+    {"disciplina":"Geografia Mundial","aulasTotais":64,"dia":"Domingo","instituicao":"GeoBrasil"},
+    {"disciplina":"Relações Internacionais","aulasTotais":64,"dia":"Segunda","instituicao":"Le Petit Journal"},
+    {"disciplina":"Geopolítica Atual","aulasTotais":64,"dia":"Terça","instituicao":"Repertório"}
+  ]
+}
