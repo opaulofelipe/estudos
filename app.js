@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const SHEET_URL = "./Estudos.xlsx";
+  const SHEET_URL = "./Estudos.xlsx";\n  const CATALOG_URL = "./Estudos.json";
   const STORAGE = {
     progress: "painel-estudos:progress:v1",
     catalog: "painel-estudos:catalog:v1",
@@ -269,6 +269,85 @@
       .replaceAll("'", "&#039;");
   }
 
+  function parseCatalogJSON(payload) {
+    const rows = Array.isArray(payload) ? payload : payload?.courses;
+    if (!Array.isArray(rows)) throw new Error("Catálogo JSON inválido.");
+
+    const rawCourses = rows.map((item, offset) => {
+      const discipline = String(item.disciplina ?? item.discipline ?? "").trim();
+      const totalLessons = Math.floor(Number(item.aulasTotais ?? item.totalLessons ?? item.aulas ?? 0));
+      if (!discipline || !Number.isFinite(totalLessons) || totalLessons <= 0) return null;
+
+      const dayRaw = String(item.dia ?? item.day ?? "").trim();
+      const institution = String(item.instituicao ?? item.institution ?? "").trim();
+      const days = parseDays(dayRaw);
+      const explicitId = String(item.id ?? "").trim();
+      const signature = `${normalizeText(discipline)}|${normalizeText(institution)}`;
+      const baseId = explicitId ? `id-${slugId(explicitId, hashString(explicitId))}` : `curso-${hashString(signature)}`;
+
+      return {
+        id: baseId,
+        discipline,
+        totalLessons,
+        days,
+        dayLabel: days.length ? days.map(day => DAY_NAMES[day]).join(", ") : dayRaw || "Sem dia",
+        institution: institution || "Sem instituição",
+        rowNumber: offset + 2
+      };
+    }).filter(Boolean);
+
+    const occurrences = new Map();
+    return rawCourses.map(course => {
+      const count = (occurrences.get(course.id) || 0) + 1;
+      occurrences.set(course.id, count);
+      return count === 1 ? course : { ...course, id: `${course.id}-${count}` };
+    });
+  }
+
+  function loadExternalScript(src, timeoutMs = 9000) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      let settled = false;
+      const done = (ok, error) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        script.onload = null;
+        script.onerror = null;
+        if (!ok) script.remove();
+        ok ? resolve() : reject(error || new Error("Falha ao carregar biblioteca externa."));
+      };
+
+      const timer = setTimeout(() => done(false, new Error("Tempo esgotado ao carregar o leitor XLSX.")), timeoutMs);
+      script.src = src;
+      script.async = true;
+      script.onload = () => done(true);
+      script.onerror = () => done(false, new Error(`Falha ao carregar ${src}`));
+      document.head.append(script);
+    });
+  }
+
+  async function ensureXLSX() {
+    if (window.XLSX) return window.XLSX;
+
+    const sources = [
+      "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js",
+      "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
+    ];
+
+    let lastError;
+    for (const src of sources) {
+      try {
+        await loadExternalScript(src);
+        if (window.XLSX) return window.XLSX;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw lastError || new Error("Não foi possível carregar o leitor XLSX.");
+  }
+
   function parseWorkbook(arrayBuffer) {
     if (!window.XLSX) throw new Error("A biblioteca de leitura da planilha não carregou.");
 
@@ -342,17 +421,30 @@
   }
 
   async function fetchSpreadsheet({ announce = true } = {}) {
-    setSyncState("syncing", "Sincronizando planilha…");
+    setSyncState("syncing", "Sincronizando catálogo…");
     els.syncButton.disabled = true;
-    try {
-      if (!window.XLSX) throw new Error("Não foi possível carregar o leitor XLSX. Verifique sua conexão.");
-      const response = await fetch(`${SHEET_URL}?v=${Date.now()}`, { cache: "no-store" });
-      if (!response.ok) throw new Error(`Não consegui abrir ${SHEET_URL} (${response.status}).`);
-      const arrayBuffer = await response.arrayBuffer();
-      const courses = parseWorkbook(arrayBuffer);
-      if (!courses.length) throw new Error("A planilha não contém disciplinas válidas.");
 
-      applyCatalog(courses, "github");
+    try {
+      let courses = [];
+      let usedXlsxFallback = false;
+
+      try {
+        const response = await fetch(`${CATALOG_URL}?v=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`Não consegui abrir ${CATALOG_URL} (${response.status}).`);
+        courses = parseCatalogJSON(await response.json());
+      } catch (catalogError) {
+        usedXlsxFallback = true;
+        await ensureXLSX();
+
+        const response = await fetch(`${SHEET_URL}?v=${Date.now()}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`Não consegui abrir ${SHEET_URL} (${response.status}).`);
+        const arrayBuffer = await response.arrayBuffer();
+        courses = parseWorkbook(arrayBuffer);
+      }
+
+      if (!courses.length) throw new Error("O catálogo não contém disciplinas válidas.");
+
+      applyCatalog(courses, usedXlsxFallback ? "github" : "catalog");
       if (announce) showToast(`${courses.length} disciplinas sincronizadas. Seu progresso foi preservado.`);
       return true;
     } catch (error) {
@@ -967,6 +1059,7 @@
   async function importSpreadsheet(file) {
     setSyncState("syncing", "Lendo planilha local…");
     try {
+      await ensureXLSX();
       const arrayBuffer = await file.arrayBuffer();
       const courses = parseWorkbook(arrayBuffer);
       if (!courses.length) throw new Error("A planilha não contém disciplinas válidas.");
