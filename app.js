@@ -1,7 +1,8 @@
 (() => {
   "use strict";
 
-  const SHEET_URL = "./Estudos.xlsx";\n  const CATALOG_URL = "./Estudos.json";
+  const SHEET_URL = "./Estudos.xlsx";
+  const CATALOG_URL = "./Estudos.json";
   const STORAGE = {
     progress: "painel-estudos:progress:v1",
     catalog: "painel-estudos:catalog:v1",
