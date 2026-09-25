@@ -33,7 +33,6 @@
     overviewLoading: $("#overviewLoading"),
     overviewContent: $("#overviewContent"),
     globalProgressLabel: $("#globalProgressLabel"),
-    globalProgressText: $("#globalProgressText"),
     metricCourses: $("#metricCourses"),
     metricRemaining: $("#metricRemaining"),
     metricCompleted: $("#metricCompleted"),
@@ -533,7 +532,6 @@
     const remaining = Math.max(0, stats.total - stats.completed);
 
     els.globalProgressLabel.textContent = `${stats.percent}%`;
-    els.globalProgressText.textContent = `${stats.completed.toLocaleString("pt-BR")} de ${stats.total.toLocaleString("pt-BR")} aulas no total`;
     els.metricCourses.textContent = state.courses.length.toLocaleString("pt-BR");
     els.metricRemaining.textContent = remaining.toLocaleString("pt-BR");
     els.metricCompleted.textContent = stats.completed.toLocaleString("pt-BR");
@@ -549,9 +547,7 @@
 
   function renderTodayCourses() {
     const today = new Date().getDay();
-    const courses = state.courses
-      .filter(course => course.days.includes(today))
-      .sort((a, b) => a.discipline.localeCompare(b.discipline, "pt-BR", { sensitivity: "base" }));
+    const courses = state.courses.filter(course => course.days.includes(today));
     els.todayCountBadge.textContent = `${courses.length} ${courses.length === 1 ? "matéria" : "matérias"}`;
 
     if (!courses.length) {
@@ -620,11 +616,14 @@
     els.courseProgressList.innerHTML = ordered.map(course => {
       const stats = getCourseStats(course);
       const color = courseColor(course);
-      const statusClass = stats.percent === 100 ? "is-done" : stats.percent > 0 ? "is-started" : "";
-      const statusLabel = stats.percent === 100 ? "Concluída" : stats.percent > 0 ? "Em andamento" : "Não iniciada";
       return `
         <article class="progress-card" style="--course-color:${color}">
-          <div class="progress-card__donut" style="--p:${stats.percent}" role="img" aria-label="${stats.percent}% de ${escapeHTML(course.discipline)} concluído">
+          <div
+            class="progress-card__donut"
+            style="--p:${stats.percent}"
+            role="img"
+            aria-label="${stats.percent}% de ${escapeHTML(course.discipline)} concluído"
+          >
             <div class="progress-card__donut-inner">
               <strong>${stats.percent}%</strong>
               <span>${stats.completed}/${stats.total}</span>
@@ -634,7 +633,6 @@
             <h3>${escapeHTML(course.discipline)}</h3>
             <p>${escapeHTML(course.institution)} · ${escapeHTML(course.dayLabel)}</p>
           </div>
-          <span class="progress-card__status ${statusClass}">${statusLabel}</span>
         </article>`;
     }).join("");
   }
