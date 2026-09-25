@@ -8,7 +8,7 @@
   <meta name="description" content="Painel pessoal para organizar aulas, rotina semanal e progresso de estudos.">
   <title>Estudos — Central de foco</title>
   <link rel="preconnect" href="https://cdn.sheetjs.com">
-  <link rel="stylesheet" href="styles.css?v=7">
+  <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
@@ -66,7 +66,18 @@
           </div>
         </header>
 
-        <section class="command-grid" aria-label="Resumo e próxima ação">
+        <section class="command-grid" aria-label="Resumo do dia">
+          <article class="panel today-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">AGENDA</span>
+                <h2>Hoje</h2>
+              </div>
+              <span class="count-pill" id="todayCountBadge">0 matérias</span>
+            </div>
+            <div id="todayCourses" class="today-list"></div>
+          </article>
+
           <aside class="overview-score" aria-label="Panorama geral">
             <div class="score-main">
               <span class="eyebrow">PROGRESSO GERAL</span>
@@ -90,45 +101,32 @@
           </aside>
         </section>
 
-        <section class="dashboard-grid">
-          <article class="panel today-panel">
-            <div class="panel-heading">
+        <section class="support-grid" aria-label="Foco e ritmo semanal">
+          <article class="panel focus-card">
+            <div class="panel-heading panel-heading--compact">
               <div>
-                <span class="eyebrow">AGENDA</span>
-                <h2>Hoje</h2>
+                <span class="eyebrow">FOCO</span>
+                <h2>Sessão de 25 min</h2>
               </div>
-              <span class="count-pill" id="todayCountBadge">0 matérias</span>
+              <svg class="focus-card__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 2h6"/></svg>
             </div>
-            <div id="todayCourses" class="today-list"></div>
+            <p id="focusCourse" class="focus-card__course">Selecione uma disciplina</p>
+            <div class="focus-timer" id="focusTimer" aria-live="polite">25:00</div>
+            <div class="focus-actions">
+              <button class="btn btn--ink" id="focusStartButton" type="button">Iniciar</button>
+              <button class="btn btn--quiet" id="focusResetButton" type="button">Reiniciar</button>
+            </div>
           </article>
 
-          <div class="side-column">
-            <article class="panel focus-card">
-              <div class="panel-heading panel-heading--compact">
-                <div>
-                  <span class="eyebrow">FOCO</span>
-                  <h2>Sessão de 25 min</h2>
-                </div>
-                <svg class="focus-card__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 2h6"/></svg>
+          <article class="panel week-card">
+            <div class="panel-heading panel-heading--compact">
+              <div>
+                <span class="eyebrow">RITMO</span>
+                <h2>Sua semana</h2>
               </div>
-              <p id="focusCourse" class="focus-card__course">Selecione uma disciplina</p>
-              <div class="focus-timer" id="focusTimer" aria-live="polite">25:00</div>
-              <div class="focus-actions">
-                <button class="btn btn--ink" id="focusStartButton" type="button">Iniciar</button>
-                <button class="btn btn--quiet" id="focusResetButton" type="button">Reiniciar</button>
-              </div>
-            </article>
-
-            <article class="panel week-card">
-              <div class="panel-heading panel-heading--compact">
-                <div>
-                  <span class="eyebrow">RITMO</span>
-                  <h2>Sua semana</h2>
-                </div>
-              </div>
-              <div id="weekStrip" class="week-strip" aria-label="Distribuição semanal de disciplinas"></div>
-            </article>
-          </div>
+            </div>
+            <div id="weekStrip" class="week-strip" aria-label="Distribuição semanal de disciplinas"></div>
+          </article>
         </section>
 
         <section class="progress-section">
