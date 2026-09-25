@@ -3,221 +3,244 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#141A36">
+  <meta name="theme-color" content="#171714">
   <meta name="color-scheme" content="light">
-  <meta name="description" content="Workspace de estudos responsivo integrado a uma planilha XLSX.">
-  <title>Estudos — Painel pessoal</title>
+  <meta name="description" content="Painel pessoal para organizar aulas, rotina semanal e progresso de estudos.">
+  <title>Estudos — Central de foco</title>
   <link rel="preconnect" href="https://cdn.sheetjs.com">
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
 
-  <div class="app-shell">
-    <aside class="app-header" aria-label="Navegação principal">
-      <div class="app-header__inner">
-        <div class="brand">
-          <span class="brand__mark" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M5 5.5A2.5 2.5 0 0 1 7.5 3H20v16H7.5A2.5 2.5 0 0 0 5 21.5v-16Z"/><path d="M5 5.5V18A2.5 2.5 0 0 1 7.5 15.5H20"/></svg>
-          </span>
-          <div class="brand__copy">
-            <p class="eyebrow eyebrow--light">WORKSPACE</p>
-            <h1>Estudos</h1>
-          </div>
-        </div>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="#" aria-label="Estudos, início">
+        <span class="brand__glyph" aria-hidden="true">E</span>
+        <span class="brand__copy">
+          <strong>Estudos</strong>
+          <small>central de foco</small>
+        </span>
+      </a>
 
-        <nav class="tabs" role="tablist" aria-label="Seções do painel">
-          <button class="tab is-active" id="tab-overview" role="tab" aria-selected="true" aria-controls="panel-overview" tabindex="0" data-tab="overview" type="button">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z"/></svg>
-            <span>Visão geral</span>
-          </button>
-          <button class="tab" id="tab-lessons" role="tab" aria-selected="false" aria-controls="panel-lessons" tabindex="-1" data-tab="lessons" type="button">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Zm0 0V18a2.5 2.5 0 0 1 2.5-2.5H20"/></svg>
-            <span>Aulas</span>
-          </button>
-        </nav>
+      <nav class="tabs" role="tablist" aria-label="Seções do painel">
+        <button class="tab is-active" id="tab-overview" role="tab" aria-selected="true" aria-controls="panel-overview" tabindex="0" data-tab="overview" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4v9Zm0 7h6v-4H4v4Zm10 0h6v-9h-6v9Zm0-16v4h6V4h-6Z"/></svg>
+          Hoje
+        </button>
+        <button class="tab" id="tab-lessons" role="tab" aria-selected="false" aria-controls="panel-lessons" tabindex="-1" data-tab="lessons" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Zm0 0V18a2.5 2.5 0 0 1 2.5-2.5H20"/></svg>
+          Todas as aulas
+        </button>
+      </nav>
 
-        <div class="header-actions">
-          <div class="sync-status" id="syncStatus" role="status" aria-live="polite">
-            <span class="sync-dot" aria-hidden="true"></span>
-            <span id="syncStatusText">Carregando planilha…</span>
-          </div>
-          <button class="btn btn--light" id="syncButton" type="button">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5M4 18v-5h5M18.4 9A7 7 0 0 0 6.2 6.4L4 11m16 2-2.2 4.6A7 7 0 0 1 5.6 15"/></svg>
-            Sincronizar
-          </button>
+      <div class="topbar__actions">
+        <div class="sync-status" id="syncStatus" role="status" aria-live="polite">
+          <span class="sync-dot" aria-hidden="true"></span>
+          <span id="syncStatusText">Carregando…</span>
         </div>
+        <button class="icon-button" id="syncButton" type="button" aria-label="Sincronizar planilha" title="Sincronizar planilha">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5M4 18v-5h5M18.4 9A7 7 0 0 0 6.2 6.4L4 11m16 2-2.2 4.6A7 7 0 0 1 5.6 15"/></svg>
+        </button>
       </div>
-    </aside>
+    </div>
+  </header>
 
-    <div class="workspace">
-      <header class="subheader">
-        <div class="container subheader__inner">
-          <div class="page-intro">
-            <p class="eyebrow">SEU RITMO DE ESTUDO</p>
-            <div class="today-line">
-              <p id="todayDate" class="today-date">Hoje</p>
-              <span class="today-divider" aria-hidden="true"></span>
-              <p id="todaySummary" class="today-summary">Preparando suas matérias…</p>
+  <main id="main-content" class="page-shell">
+    <section id="panel-overview" class="tab-panel" role="tabpanel" aria-labelledby="tab-overview" tabindex="0">
+      <div id="overviewLoading" class="loading-panel" aria-live="polite">
+        <span class="spinner" aria-hidden="true"></span>
+        Organizando seu painel…
+      </div>
+
+      <div id="overviewContent" hidden>
+        <header class="dashboard-intro">
+          <div>
+            <p class="kicker">PAINEL DE HOJE</p>
+            <h1 id="todayDate">Hoje</h1>
+            <p id="todaySummary">Preparando suas matérias…</p>
+          </div>
+          <div class="dashboard-intro__stamp" aria-hidden="true">
+            <span>ESTUDO</span>
+            <strong>01</strong>
+          </div>
+        </header>
+
+        <section class="command-grid" aria-label="Resumo e próxima ação">
+          <article class="continue-card">
+            <div class="continue-card__noise" aria-hidden="true"></div>
+            <div class="continue-card__head">
+              <span class="eyebrow eyebrow--light">CONTINUE DE ONDE PAROU</span>
+              <span class="continue-card__badge">PRÓXIMA AÇÃO</span>
+            </div>
+            <div class="continue-card__body">
+              <p class="continue-card__label">Agora</p>
+              <h2 id="continueCourse">Carregando disciplina…</h2>
+              <p id="continueMeta">Preparando sua próxima aula.</p>
+            </div>
+            <div class="continue-card__progress">
+              <div class="progress-track progress-track--dark"><span id="continueBar"></span></div>
+              <div class="continue-card__progress-copy">
+                <span id="continuePercent">0% concluído</span>
+                <span id="globalProgressText">0 de 0 aulas no total</span>
+              </div>
+            </div>
+            <div class="continue-card__actions">
+              <button class="btn btn--paper" id="continueOpenButton" type="button">Abrir disciplina</button>
+              <button class="btn btn--accent" id="continueCompleteButton" type="button">Concluir próxima aula</button>
+            </div>
+          </article>
+
+          <aside class="overview-score" aria-label="Panorama geral">
+            <div class="score-main">
+              <span class="eyebrow">PROGRESSO GERAL</span>
+              <strong id="globalProgressLabel">0%</strong>
+              <span>do caminho concluído</span>
+            </div>
+            <div class="metric-stack">
+              <div class="metric-row">
+                <span>Disciplinas</span>
+                <strong id="metricCourses">0</strong>
+              </div>
+              <div class="metric-row">
+                <span>Aulas restantes</span>
+                <strong id="metricRemaining">0</strong>
+              </div>
+              <div class="metric-row">
+                <span>Aulas concluídas</span>
+                <strong id="metricCompleted">0</strong>
+              </div>
+            </div>
+          </aside>
+        </section>
+
+        <section class="dashboard-grid">
+          <article class="panel today-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">AGENDA</span>
+                <h2>Hoje</h2>
+              </div>
+              <span class="count-pill" id="todayCountBadge">0 matérias</span>
+            </div>
+            <div id="todayCourses" class="today-list"></div>
+          </article>
+
+          <div class="side-column">
+            <article class="panel focus-card">
+              <div class="panel-heading panel-heading--compact">
+                <div>
+                  <span class="eyebrow">FOCO</span>
+                  <h2>Sessão de 25 min</h2>
+                </div>
+                <svg class="focus-card__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5M9 2h6"/></svg>
+              </div>
+              <p id="focusCourse" class="focus-card__course">Selecione uma disciplina</p>
+              <div class="focus-timer" id="focusTimer" aria-live="polite">25:00</div>
+              <div class="focus-actions">
+                <button class="btn btn--ink" id="focusStartButton" type="button">Iniciar</button>
+                <button class="btn btn--quiet" id="focusResetButton" type="button">Reiniciar</button>
+              </div>
+            </article>
+
+            <article class="panel week-card">
+              <div class="panel-heading panel-heading--compact">
+                <div>
+                  <span class="eyebrow">RITMO</span>
+                  <h2>Sua semana</h2>
+                </div>
+              </div>
+              <div id="weekStrip" class="week-strip" aria-label="Distribuição semanal de disciplinas"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="progress-section">
+          <div class="panel-heading progress-section__heading">
+            <div>
+              <span class="eyebrow">MAPA DE PROGRESSO</span>
+              <h2>Onde sua atenção é mais necessária</h2>
+            </div>
+            <p>Disciplinas menos avançadas aparecem primeiro.</p>
+          </div>
+          <div id="courseProgressList" class="progress-list"></div>
+        </section>
+
+        <details class="data-drawer">
+          <summary>
+            <span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+              Planilha, backup e dados
+            </span>
+            <span class="data-drawer__hint">Ferramentas secundárias</span>
+          </summary>
+          <div class="data-drawer__body">
+            <div>
+              <span class="eyebrow">DADOS</span>
+              <h2>Gerencie a fonte do painel</h2>
+              <p>Sincronizar atualiza o catálogo sem apagar seu progresso local.</p>
+              <p class="last-sync" id="lastSyncText">Ainda não sincronizado.</p>
+            </div>
+            <div class="data-actions">
+              <button class="btn btn--ink" id="importSheetButton" type="button">Importar XLSX local</button>
+              <button class="btn btn--quiet" id="exportBackupButton" type="button">Exportar backup</button>
+              <button class="btn btn--quiet" id="importBackupButton" type="button">Restaurar backup</button>
             </div>
           </div>
-          <div class="workspace-chip" aria-hidden="true">
-            <span class="workspace-chip__dot"></span>
-            Painel pessoal
-          </div>
+        </details>
+      </div>
+    </section>
+
+    <section id="panel-lessons" class="tab-panel" role="tabpanel" aria-labelledby="tab-lessons" tabindex="0" hidden>
+      <header class="catalog-intro">
+        <div>
+          <p class="kicker">CATÁLOGO</p>
+          <h1>Todas as aulas</h1>
+          <p>Abra uma disciplina para marcar, revisar ou corrigir seu progresso.</p>
         </div>
       </header>
 
-      <main id="main-content" class="container main-content">
-        <section id="panel-overview" class="tab-panel" role="tabpanel" aria-labelledby="tab-overview" tabindex="0">
-          <div id="overviewLoading" class="loading-panel" aria-live="polite">
-            <span class="spinner" aria-hidden="true"></span>
-            Lendo <strong>Estudos.xlsx</strong>…
-          </div>
+      <div class="lessons-toolbar">
+        <label class="search-field">
+          <span class="sr-only">Buscar disciplina</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+          <input id="courseSearch" type="search" placeholder="Buscar disciplina ou instituição" autocomplete="off">
+        </label>
 
-          <div id="overviewContent" hidden>
-            <section class="hero-grid" aria-label="Resumo do progresso">
-              <article class="progress-hero card card--dark">
-                <div class="progress-hero__copy">
-                  <p class="eyebrow eyebrow--light">PROGRESSO GERAL</p>
-                  <h2 id="globalProgressLabel">0%</h2>
-                  <p id="globalProgressText">0 de 0 aulas concluídas</p>
-                </div>
-                <div class="progress-ring" id="globalProgressRing" aria-label="Progresso geral de 0%" role="img">
-                  <div class="progress-ring__inner">
-                    <strong id="globalProgressRingText">0%</strong>
-                    <span>concluído</span>
-                  </div>
-                </div>
-              </article>
+        <label class="select-field">
+          <span class="sr-only">Filtrar por dia</span>
+          <select id="dayFilter">
+            <option value="all">Todos os dias</option>
+            <option value="0">Domingo</option>
+            <option value="1">Segunda</option>
+            <option value="2">Terça</option>
+            <option value="3">Quarta</option>
+            <option value="4">Quinta</option>
+            <option value="5">Sexta</option>
+            <option value="6">Sábado</option>
+          </select>
+        </label>
 
-              <article class="metric card">
-                <div class="metric__icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 3v4M16 3v4M4 9h16"/></svg>
-                </div>
-                <div><span>Disciplinas</span><strong id="metricCourses">0</strong></div>
-              </article>
+        <div class="toolbar-actions">
+          <button class="btn btn--quiet" id="expandAllButton" type="button">Expandir</button>
+          <button class="btn btn--danger" id="completeEverythingButton" type="button">Concluir tudo</button>
+        </div>
+      </div>
 
-              <article class="metric card">
-                <div class="metric__icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg>
-                </div>
-                <div><span>Total de aulas</span><strong id="metricLessons">0</strong></div>
-              </article>
+      <div class="lesson-help" role="note">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        Se você marcar uma aula deixando anteriores pendentes, o painel oferece concluir a sequência inteira.
+      </div>
 
-              <article class="metric card">
-                <div class="metric__icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>
-                </div>
-                <div><span>Concluídas</span><strong id="metricCompleted">0</strong></div>
-              </article>
-            </section>
+      <div id="coursesList" class="courses-list"></div>
 
-            <section class="section-block" aria-labelledby="todayHeading">
-              <div class="section-heading">
-                <div>
-                  <p class="eyebrow">FOCO DO DIA</p>
-                  <h2 id="todayHeading">Matérias de hoje</h2>
-                </div>
-                <span class="badge" id="todayCountBadge">0 matérias</span>
-              </div>
-              <div id="todayCourses" class="today-courses"></div>
-            </section>
-
-            <section class="overview-columns">
-              <div class="section-block">
-                <div class="section-heading">
-                  <div>
-                    <p class="eyebrow">ACOMPANHAMENTO</p>
-                    <h2>Progresso por disciplina</h2>
-                  </div>
-                </div>
-                <div id="courseProgressList" class="course-progress-list"></div>
-              </div>
-
-              <aside class="side-stack">
-                <section class="card data-card" aria-labelledby="dataHeading">
-                  <div class="data-card__icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
-                  </div>
-                  <div class="section-heading section-heading--compact">
-                    <div>
-                      <p class="eyebrow">ARQUIVOS & BACKUP</p>
-                      <h2 id="dataHeading">Seus dados, sob controle</h2>
-                    </div>
-                  </div>
-                  <p class="muted">O progresso fica salvo neste navegador. Sincronizar a planilha atualiza disciplinas e quantidade de aulas sem apagar o que já foi marcado.</p>
-                  <div class="data-actions">
-                    <button class="btn btn--secondary btn--full" id="importSheetButton" type="button">
-                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 19h14"/></svg>
-                      Importar XLSX local
-                    </button>
-                    <button class="btn btn--ghost btn--full" id="exportBackupButton" type="button">Exportar backup</button>
-                    <button class="btn btn--ghost btn--full" id="importBackupButton" type="button">Restaurar backup</button>
-                  </div>
-                  <p class="last-sync" id="lastSyncText">Ainda não sincronizado.</p>
-                </section>
-              </aside>
-            </section>
-          </div>
-        </section>
-
-        <section id="panel-lessons" class="tab-panel" role="tabpanel" aria-labelledby="tab-lessons" tabindex="0" hidden>
-          <div class="lessons-heading">
-            <div>
-              <p class="eyebrow">CATÁLOGO DE AULAS</p>
-              <h2>Disciplinas e progresso</h2>
-            </div>
-            <p>Pesquise, filtre e marque as aulas conforme avança.</p>
-          </div>
-
-          <div class="lessons-toolbar card">
-            <div class="toolbar-main">
-              <label class="search-field">
-                <span class="sr-only">Buscar disciplina</span>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-                <input id="courseSearch" type="search" placeholder="Buscar disciplina ou instituição" autocomplete="off">
-              </label>
-
-              <label class="select-field">
-                <span class="sr-only">Filtrar por dia</span>
-                <select id="dayFilter">
-                  <option value="all">Todos os dias</option>
-                  <option value="0">Domingo</option>
-                  <option value="1">Segunda</option>
-                  <option value="2">Terça</option>
-                  <option value="3">Quarta</option>
-                  <option value="4">Quinta</option>
-                  <option value="5">Sexta</option>
-                  <option value="6">Sábado</option>
-                </select>
-              </label>
-            </div>
-
-            <div class="toolbar-actions">
-              <button class="btn btn--secondary" id="expandAllButton" type="button">Expandir</button>
-              <button class="btn btn--danger-soft" id="completeEverythingButton" type="button">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
-                Concluir tudo
-              </button>
-            </div>
-          </div>
-
-          <div class="lesson-help" role="note">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
-            Ao marcar uma aula com anteriores pendentes, o painel pergunta se você quer concluir toda a sequência até ela.
-          </div>
-
-          <div id="coursesList" class="courses-list"></div>
-          <div id="emptyCourses" class="empty-state" hidden>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg>
-            <h2>Nenhuma disciplina encontrada</h2>
-            <p>Altere a busca ou o filtro de dia.</p>
-          </div>
-        </section>
-      </main>
-    </div>
-  </div>
+      <div id="emptyCourses" class="empty-state" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 9h8M8 13h5"/></svg>
+        <h2>Nenhuma disciplina encontrada</h2>
+        <p>Altere a busca ou o filtro de dia.</p>
+      </div>
+    </section>
+  </main>
 
   <dialog id="confirmDialog" class="dialog" aria-labelledby="dialogTitle" aria-describedby="dialogDescription">
     <form method="dialog" class="dialog__content">
@@ -238,6 +261,6 @@
   <input id="backupFileInput" type="file" accept="application/json,.json" hidden>
 
   <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
