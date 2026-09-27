@@ -562,35 +562,10 @@
       return;
     }
 
-    els.todayCourses.innerHTML = courses.map((course, index) => {
-      const stats = getCourseStats(course);
-      const next = getNextLesson(course);
-      const color = courseColor(course);
-      const complete = next === null;
-      return `
-        <article class="today-item ${complete ? "is-complete" : ""}" style="--course-color:${color}">
-          <span class="today-item__index" aria-hidden="true">${String(index + 1).padStart(2, "0")}</span>
-          <div class="today-item__copy">
-            <h3>${escapeHTML(course.discipline)}</h3>
-            <p>${escapeHTML(course.institution)} · ${complete ? "disciplina concluída" : `próxima: aula ${next}`}</p>
-          </div>
-          <div class="today-item__progress">
-            <div class="today-item__progress-row">
-              <span>${stats.completed}/${stats.total} aulas</span>
-              <strong>${stats.percent}%</strong>
-            </div>
-            <div class="progress-track" aria-label="${stats.percent}% concluído"><span style="width:${stats.percent}%;background:${color}"></span></div>
-          </div>
-          <div class="today-item__actions">
-            <button class="mini-action" type="button" data-open-course="${escapeHTML(course.id)}" aria-label="Abrir ${escapeHTML(course.discipline)}" title="Abrir disciplina">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-            </button>
-            <button class="mini-action mini-action--complete" type="button" data-complete-next="${escapeHTML(course.id)}" aria-label="${complete ? "Disciplina concluída" : `Concluir aula ${next} de ${escapeHTML(course.discipline)}`}" title="${complete ? "Concluída" : `Concluir aula ${next}`}" ${complete ? "disabled" : ""}>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
-            </button>
-          </div>
-        </article>`;
-    }).join("");
+    els.todayCourses.innerHTML = courses.map(course => `
+      <article class="today-item">
+        <h3>${escapeHTML(course.discipline)}</h3>
+      </article>`).join("");
   }
 
   function renderWeekStrip() {
@@ -609,9 +584,11 @@
   }
 
   function renderCourseProgress() {
-    const ordered = [...state.courses].sort((a, b) =>
-      a.discipline.localeCompare(b.discipline, "pt-BR", { sensitivity: "base" })
-    );
+    const ordered = [...state.courses].sort((a, b) => {
+      const percentDiff = getCourseStats(b).percent - getCourseStats(a).percent;
+      if (percentDiff !== 0) return percentDiff;
+      return a.discipline.localeCompare(b.discipline, "pt-BR", { sensitivity: "base" });
+    });
 
     els.courseProgressList.innerHTML = ordered.map(course => {
       const stats = getCourseStats(course);
